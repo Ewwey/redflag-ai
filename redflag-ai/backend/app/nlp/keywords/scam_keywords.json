@@ -1,0 +1,15 @@
+[
+  { "phrase": "send GCash", "category": "Financial", "weight": 3 },
+  { "phrase": "processing fee", "category": "Financial", "weight": 3 },
+  { "phrase": "registration fee", "category": "Financial", "weight": 3 },
+  { "phrase": "move to Telegram", "category": "Contact Method", "weight": 3 },
+  { "phrase": "contact via WhatsApp only", "category": "Contact Method", "weight": 2 },
+  { "phrase": "no experience needed", "category": "Unrealistic Offer", "weight": 2 },
+  { "phrase": "earn up to 50000", "category": "Unrealistic Offer", "weight": 3 },
+  { "phrase": "work from home guaranteed", "category": "Unrealistic Offer", "weight": 2 },
+  { "phrase": "urgent hiring", "category": "Urgency", "weight": 1 },
+  { "phrase": "apply now limited slots", "category": "Urgency", "weight": 2 },
+  { "phrase": "send personal information", "category": "Data Harvesting", "weight": 3 },
+  { "phrase": "send government ID", "category": "Data Harvesting", "weight": 3 },
+  { "phrase": "pay training materials", "category": "Financial", "weight": 3 }
+]
