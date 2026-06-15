@@ -2,8 +2,11 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from app.core.config import settings
 from app.api import auth, scans, guide, profile
+from app.db.database import create_tables
 
 app = FastAPI(title="RedFlag AI API", version="1.0.0")
+
+create_tables()
 
 app.add_middleware(
     CORSMiddleware,
