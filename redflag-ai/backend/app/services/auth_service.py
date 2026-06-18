@@ -20,7 +20,17 @@ def register_user(db: Session, data: RegisterRequest):
 
 def login_user(db: Session, data: LoginRequest):
     user = db.query(User).filter(User.email == data.email).first()
+
+    # IMPORTANT: generic error message (security requirement AC-L03)
     if not user or not verify_password(data.password, user.password_hash):
-        raise HTTPException(status_code=401, detail="Incorrect email or password. Please try again.")
+        raise HTTPException(
+            status_code=401,
+            detail="Incorrect email or password."
+        )
+
     token = create_access_token({"sub": str(user.id)})
-    return {"access_token": token, "token_type": "bearer"}
+
+    return {
+        "access_token": token,
+        "token_type": "bearer"
+    }

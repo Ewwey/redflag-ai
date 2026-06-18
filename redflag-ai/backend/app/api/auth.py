@@ -13,7 +13,6 @@ def register(data: RegisterRequest, db: Session = Depends(get_db)):
 
 @router.post("/login", response_model=TokenResponse)
 def login(data: LoginRequest, db: Session = Depends(get_db)):
-    # TODO: Sprint 2 — implement login
     return login_user(db, data)
 
 @router.post("/logout")
