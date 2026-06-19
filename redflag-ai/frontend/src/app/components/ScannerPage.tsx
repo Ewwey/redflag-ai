@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useNavigate } from "react-router";
+import { useNavigate } from "react-router-dom";
 import { Navbar } from "./Navbar";
 import { Loader2 } from "lucide-react";
 

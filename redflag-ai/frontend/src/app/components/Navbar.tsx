@@ -1,4 +1,4 @@
-import { Link } from "react-router";
+import { Link } from "react-router-dom";
 import { Shield, User, LayoutDashboard, BookOpen } from "lucide-react";
 
 interface NavbarProps {

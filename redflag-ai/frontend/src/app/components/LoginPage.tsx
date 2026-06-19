@@ -3,6 +3,7 @@ import { Link, useNavigate } from "react-router-dom";
 import { Shield } from "lucide-react";
 import { login } from "../../services/authService";
 import "../../styles/login.css";
+import { useAuth } from "../../hooks/useAuth";
 
 type FieldErrors = {
   email?: string;
@@ -12,6 +13,7 @@ type FieldErrors = {
 
 export function LoginPage() {
   const navigate = useNavigate();
+const { login } = useAuth();
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -56,16 +58,13 @@ export function LoginPage() {
 
       const data = response.data;
 
-      localStorage.setItem(
-        "redflagUser",
-        JSON.stringify({
-          token: data.access_token,
-          tokenType: data.token_type || "bearer",
-          user: data.user || { email: email.trim() },
-          isLoggedIn: true,
-          loginTime: new Date().toISOString(),
-        })
-      );
+      login({
+  token: data.access_token,
+  tokenType: data.token_type || "bearer",
+  user: data.user || {
+    email: email.trim(),
+  },
+});
 
       navigate("/dashboard");
     } catch (error: any) {

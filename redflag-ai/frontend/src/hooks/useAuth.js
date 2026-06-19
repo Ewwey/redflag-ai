@@ -1,6 +1,6 @@
-// useAuth — custom React hook
-import { useState } from 'react';
+import { useContext } from "react";
+import { AuthContext } from "../context/AuthContext";
 
 export function useAuth() {
-  // TODO
+  return useContext(AuthContext);
 }

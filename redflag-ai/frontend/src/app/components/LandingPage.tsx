@@ -1,4 +1,4 @@
-import { Link } from "react-router";
+import { Link } from "react-router-dom";
 import { Shield, Zap, Target, Mail, ArrowRight, ShieldAlert, CheckCircle2 } from "lucide-react";
 
 export function LandingPage() {

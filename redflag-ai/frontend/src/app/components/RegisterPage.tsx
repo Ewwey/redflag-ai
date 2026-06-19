@@ -1,4 +1,4 @@
-import { Link, useNavigate } from "react-router";
+import { Link, useNavigate } from "react-router-dom";
 import { Shield } from "lucide-react";
 import { useState } from "react";
 import { register } from "../../services/authService";
