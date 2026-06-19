@@ -13,7 +13,6 @@ type FieldErrors = {
 
 export function LoginPage() {
   const navigate = useNavigate();
-const { login } = useAuth();
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -51,21 +50,15 @@ const { login } = useAuth();
       setIsSubmitting(true);
       setErrors({});
 
-      const response = await login({
-        email: email.trim(),
-        password,
-      });
+      const response = await loginAPI({ email, password });
 
       const data = response.data;
 
-      login({
-  token: data.access_token,
-  tokenType: data.token_type || "bearer",
-  user: data.user || {
-    email: email.trim(),
-  },
-});
-
+      loginContext({
+        token: data.access_token,
+        tokenType: data.token_type || "bearer",
+        user: { email }
+      });
       navigate("/dashboard");
     } catch (error: any) {
       const message =
