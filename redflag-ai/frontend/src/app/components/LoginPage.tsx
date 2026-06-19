@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router";
 import { Shield } from "lucide-react";
+import "../../styles/login.css";
 
 export function LoginPage() {
   const navigate = useNavigate();
@@ -29,21 +30,21 @@ export function LoginPage() {
   };
 
   return (
-    <div className="min-h-screen bg-[#0D1117] text-white flex items-center justify-center p-6">
-      <div className="w-full max-w-md">
-        <div className="bg-white/5 border border-white/10 rounded-2xl p-8">
-          <div className="flex justify-center mb-8">
-            <div className="flex items-center gap-2">
-              <Shield className="w-8 h-8 text-red-600" />
-              <span className="text-xl font-semibold">RedFlag AI</span>
+    <div className="login-page">
+      <div className="login-page__container">
+        <div className="login-page__card">
+          <div className="login-page__logo">
+            <div className="login-page__logo-wrap">
+              <Shield className="login-page__logo-icon" />
+              <span className="login-page__logo-text">RedFlag AI</span>
             </div>
           </div>
 
-          <h2 className="text-2xl font-bold text-center mb-8">Welcome Back</h2>
+          <h2 className="login-page__title">Welcome Back</h2>
 
-          <form onSubmit={handleSubmit} className="space-y-5">
-            <div>
-              <label htmlFor="email" className="block text-sm mb-2 text-gray-300">
+          <form onSubmit={handleSubmit} className="login-page__form">
+            <div className="login-page__field">
+              <label htmlFor="email" className="login-page__label">
                 Email
               </label>
               <input
@@ -52,12 +53,12 @@ export function LoginPage() {
                 placeholder="your.email@example.com"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-600 focus:border-transparent transition-all placeholder:text-gray-500"
+                className="login-page__input"
               />
             </div>
 
-            <div>
-              <label htmlFor="password" className="block text-sm mb-2 text-gray-300">
+            <div className="login-page__field">
+              <label htmlFor="password" className="login-page__label">
                 Password
               </label>
               <input
@@ -66,40 +67,38 @@ export function LoginPage() {
                 placeholder="••••••••"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-600 focus:border-transparent transition-all placeholder:text-gray-500"
+                className="login-page__input"
               />
             </div>
 
-            {error && (
-              <p className="text-sm text-red-400">{error}</p>
-            )}
+            {error && <p className="login-page__error">{error}</p>}
 
-            <button
-              type="submit"
-              className="w-full px-4 py-3 bg-red-600 hover:bg-red-700 rounded-lg font-semibold transition-colors"
-            >
+            <button type="submit" className="login-page__button">
               Log In
             </button>
           </form>
 
-          <div className="mt-6 space-y-3 text-center">
+          <div className="login-page__links">
             <div>
-              <a href="#" className="text-sm text-red-600 hover:text-red-500 transition-colors">
+              <a href="#" className="login-page__link login-page__link--accent">
                 Forgot password?
               </a>
             </div>
 
-            <div className="text-sm text-gray-400">
+            <div className="login-page__signup-text">
               Don't have an account?{" "}
-              <Link to="/register" className="text-red-600 hover:text-red-500 transition-colors">
+              <Link
+                to="/register"
+                className="login-page__link login-page__link--accent"
+              >
                 Sign Up
               </Link>
             </div>
           </div>
         </div>
 
-        <div className="mt-6 text-center">
-          <Link to="/" className="text-sm text-gray-400 hover:text-white transition-colors">
+        <div className="login-page__back">
+          <Link to="/" className="login-page__back-link">
             ← Back to Home
           </Link>
         </div>
