@@ -8,6 +8,12 @@ from jose import JWTError
 
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/auth/login")
 
+credentials_exception = HTTPException(
+    status_code=status.HTTP_401_UNAUTHORIZED,
+    detail="Your session has expired. Please log in again.",
+    headers={"WWW-Authenticate": "Bearer"},
+)
+    
 def get_db():
     db = SessionLocal()
     try:
@@ -18,9 +24,12 @@ def get_db():
 def get_current_user(token: str = Depends(oauth2_scheme), db: Session = Depends(get_db)):
     try:
         payload = decode_token(token)
-        user_id = int(payload.get("sub"))
+        user_id = payload.get("sub")
+        if not isinstance(user_id, str):
+            raise ValueError("Invalid token payload")
+        user_id = int(user_id)
     except (JWTError, ValueError):
-        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Your session has expired. Please log in again.")
+        raise credentials_exception
     user = db.query(User).filter(User.id == user_id).first()
     if not user:
         raise HTTPException(status_code=404, detail="User not found.")
