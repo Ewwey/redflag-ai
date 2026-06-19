@@ -18,3 +18,11 @@ def login(data: LoginRequest, db: Session = Depends(get_db)):
 def logout(current_user=Depends(get_current_user)):
     # JWT is stateless — the client must remove the token.
     return {"message": "Logged out successfully"}
+
+@router.get("/me")
+def get_current_user_info(current_user=Depends(get_current_user)):
+    return {
+        "id": current_user.id,
+        "email": current_user.email,
+        "display_name": current_user.display_name
+    }

@@ -1,6 +1,8 @@
+/* this page is useless for now, but i'm keeping it just in case
+
 import { BrowserRouter, Routes, Route } from "react-router-dom";
-import { LoginPage } from "./pages/auth/LoginPage";
-import { AuthProvider } from "./contexts/AuthContext";
+import { LoginPage } from "./components/LoginPage";
+import { AuthProvider } from "../context/AuthContext";
 
 function DashboardPage() {
   return <div>Dashboard</div>;
@@ -10,7 +12,7 @@ function HomePage() {
   return <div>Home</div>;
 }
 
-export function App() {
+//export function App() {
   return (
     <AuthProvider>
       <BrowserRouter>
@@ -23,3 +25,4 @@ export function App() {
     </AuthProvider>
   );
 }
+*/
