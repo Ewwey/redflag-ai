@@ -1,4 +1,5 @@
-import { createBrowserRouter } from "react-router";
+import { createBrowserRouter } from "react-router-dom";
+
 import { LandingPage } from "./components/LandingPage";
 import { LoginPage } from "./components/LoginPage";
 import { RegisterPage } from "./components/RegisterPage";
@@ -11,34 +12,34 @@ import { SettingsPage } from "./components/SettingsPage";
 export const router = createBrowserRouter([
   {
     path: "/",
-    Component: LandingPage,
+    element: <LandingPage />,
   },
   {
     path: "/login",
-    Component: LoginPage,
+    element: <LoginPage />,
   },
   {
     path: "/register",
-    Component: RegisterPage,
+    element: <RegisterPage />,
   },
   {
     path: "/scan",
-    Component: ScannerPage,
+    element: <ScannerPage />,
   },
   {
     path: "/result",
-    Component: ResultPage,
+    element: <ResultPage />,
   },
   {
     path: "/dashboard",
-    Component: DashboardPage,
+    element: <DashboardPage />,
   },
   {
     path: "/guide",
-    Component: RedFlagGuidePage,
+    element: <RedFlagGuidePage />,
   },
   {
     path: "/settings",
-    Component: SettingsPage,
+    element: <SettingsPage />,
   },
 ]);
