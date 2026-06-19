@@ -28,22 +28,13 @@ export const router = createBrowserRouter([
   },
 
   {
-  path: "/dashboard",
-  element: (
-    <ProtectedRoute>
-      <DashboardPage />
-    </ProtectedRoute>
-  ),
-},
-
-  {
-  path: "/result",
-  element: (
-    <ProtectedRoute>
-      <ResultPage />
-    </ProtectedRoute>
-  ),
-},
+    path: "/dashboard",
+    element: (
+      <ProtectedRoute>
+        <DashboardPage />
+      </ProtectedRoute>
+    ),
+  },
 
   {
     path: "/result",
@@ -55,13 +46,22 @@ export const router = createBrowserRouter([
   },
 
   {
-  path: "/settings",
-  element: (
-    <ProtectedRoute>
-      <SettingsPage />
-    </ProtectedRoute>
-  ),
-},
+    path: "/result",
+    element: (
+      <ProtectedRoute>
+        <ResultPage />
+      </ProtectedRoute>
+    ),
+  },
+
+  {
+    path: "/settings",
+    element: (
+      <ProtectedRoute>
+        <SettingsPage />
+      </ProtectedRoute>
+    ),
+  },
 
   {
     path: "/guide",

@@ -13,7 +13,8 @@ type FieldErrors = {
 
 export function LoginPage() {
   const navigate = useNavigate();
-
+  
+  const { login: loginContext } = useAuth();//???
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
 
@@ -50,7 +51,7 @@ export function LoginPage() {
       setIsSubmitting(true);
       setErrors({});
 
-      const response = await loginAPI({ email, password });
+      const response = await login({ email, password });
 
       const data = response.data;
 

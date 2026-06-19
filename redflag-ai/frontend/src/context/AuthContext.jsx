@@ -29,7 +29,12 @@ export function AuthProvider({ children }) {
           return;
         }
 
-        // Verify token with backend
+        // Use stored user first if present (e.g. { email } from LoginPage)
+        if (data.user) {
+          setUser(data.user);
+        }
+
+        // Verify token with backend + get real user data
         const response = await axios.get(`${API}/auth/me`, {
           headers: {
             Authorization: `Bearer ${data.token}`,
@@ -38,8 +43,7 @@ export function AuthProvider({ children }) {
 
         setUser(response.data);
         setToken(data.token);
-      } catch (error) {
-        // Invalid or expired token
+      } catch {
         localStorage.removeItem("redflagUser");
         setUser(null);
         setToken(null);
@@ -51,16 +55,23 @@ export function AuthProvider({ children }) {
     initializeAuth();
   }, []);
 
+  // data comes from LoginPage:
+  // { token, tokenType, user: { email } }
   const login = (data) => {
-    localStorage.setItem("redflagUser", JSON.stringify(data));
+    const payload = {
+      token: data.token,
+      tokenType: data.tokenType || "bearer",
+      user: data.user ?? null,
+    };
 
-    setUser(data.user);
-    setToken(data.token);
+    localStorage.setItem("redflagUser", JSON.stringify(payload));
+
+    setUser(payload.user);
+    setToken(payload.token);
   };
 
   const logout = () => {
     localStorage.removeItem("redflagUser");
-
     setUser(null);
     setToken(null);
   };
