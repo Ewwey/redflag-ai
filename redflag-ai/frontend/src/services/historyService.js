@@ -1,6 +1,9 @@
 // useHistory — custom React hook
-import { useState } from 'react';
+import axios from "axios";
+const API = import.meta.env.VITE_API_BASE_URL;
 
-export function useHistory() {
-  // TODO
-}
+export const getHistory = (token) =>
+  axios.get(`${API}/scans`, { headers: { Authorization: `Bearer ${token}` } });
+
+export const deleteHistoryEntry = (id, token) =>
+  axios.delete(`${API}/scans/${id}`, { headers: { Authorization: `Bearer ${token}` } });
