@@ -1,7 +1,11 @@
 import json
 import os
 
-KEYWORDS_PATH = os.path.join(os.path.dirname(__file__), "keywords", "scam_keywords.json")
+KEYWORDS_PATH = os.path.join(
+    os.path.dirname(__file__), 
+    "keywords", 
+    "scam_keywords.json"
+)
 
 def load_keywords():
     """Loads the scam keywords from the JSON definition file."""
