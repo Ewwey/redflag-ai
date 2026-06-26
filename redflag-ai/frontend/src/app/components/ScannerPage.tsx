@@ -2,14 +2,12 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Navbar } from "./Navbar";
 import { Loader2 } from "lucide-react";
+import axios from "axios";
 
 export function ScannerPage() {
-  const [jobPost, setJobPost] =
-    useState("");
-  const [isAnalyzing, setIsAnalyzing] =
-    useState(false);
-  const [error, setError] =
-    useState("");
+  const [jobPost, setJobPost] = useState("");
+  const [isAnalyzing, setIsAnalyzing] = useState(false);
+  const [error, setError] = useState("");
 
   const navigate = useNavigate();
 
@@ -18,54 +16,60 @@ export function ScannerPage() {
 
   const charCount = jobPost.length;
 
-  const isValid =
-    charCount >= minChars &&
-    charCount <= maxChars;
+  const isValid = charCount >= minChars && charCount <= maxChars;
 
-  const sanitizeInput = (
-    text: string
-  ) => {
+  const sanitizeInput = (text: string) => {
     return text
-      .replace(
-        /<script.*?>.*?<\/script>/gi,
-        ""
-      )
+      .replace(/<script.*?>.*?<\/script>/gi, "")
       .replace(/<[^>]*>/g, "")
       .replace(/javascript:/gi, "")
       .trim();
   };
 
-  const handleAnalyze = (
-    e: React.FormEvent
-  ) => {
+  const handleAnalyze = async (e: React.FormEvent) => {
     e.preventDefault();
 
     if (charCount < minChars) {
-      setError(
-        `Text too short. Please enter at least ${minChars} characters.`
-      );
+      setError(`Text too short. Please enter at least ${minChars} characters.`);
       return;
     }
 
     if (charCount > maxChars) {
-      setError(
-        `Text too long. Maximum allowed is ${maxChars} characters.`
-      );
+      setError(`Text too long. Maximum allowed is ${maxChars} characters.`);
       return;
     }
 
     setError("");
-
-    const sanitizedText =
-      sanitizeInput(jobPost);
-
-    console.log(sanitizedText);
-
+    const sanitizedText = sanitizeInput(jobPost);
     setIsAnalyzing(true);
 
-    setTimeout(() => {
-      navigate("/result");
-    }, 2500);
+    try {
+      // Pull endpoint base URL configured in Sprint 1 environment definitions
+      const baseURL = import.meta.env.VITE_API_BASE_URL || "http://localhost:8000";
+      
+      // Pull the user session token to fulfill Depends(get_current_user)
+      const token = localStorage.getItem("token");
+
+      // Connects directly to the prefix="/scans" router path 
+      const response = await axios.post(
+        `${baseURL}/scans`,
+        { job_description: sanitizedText },
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+
+      // Successfully forward the database/NLP response payload to the ResultPage route
+      navigate("/result", { state: { scanData: response.data } });
+    } catch (err: any) {
+      console.error("Scan analysis failed:", err);
+      const serverMessage = err.response?.data?.detail || "Something went wrong during analysis. Please try again.";
+      setError(serverMessage);
+    } finally {
+      setIsAnalyzing(false);
+    }
   };
 
   return (
@@ -77,61 +81,40 @@ export function ScannerPage() {
           <div className="text-center">
             <Loader2 className="w-16 h-16 text-red-600 animate-spin mx-auto mb-4" />
             <p className="text-xl text-gray-300">
-              Analyzing job post for red
-              flags...
+              Analyzing job post for red flags...
             </p>
           </div>
         </div>
       )}
 
       <div className="max-w-4xl mx-auto px-6 py-12">
-        <h1 className="text-4xl font-bold mb-2">
-          Scan a Job Post
-        </h1>
+        <h1 className="text-4xl font-bold mb-2">Scan a Job Post</h1>
 
         <p className="text-gray-400 mb-8">
-          Paste the job description below
-          and our AI will analyze it for
-          scam indicators.
+          Paste the job description below and our AI will analyze it for scam indicators.
         </p>
 
-        <form
-          onSubmit={handleAnalyze}
-          className="space-y-4"
-        >
+        <form onSubmit={handleAnalyze} className="space-y-4">
           <textarea
             value={jobPost}
-            onChange={(e) =>
-              setJobPost(
-                e.target.value.slice(
-                  0,
-                  maxChars
-                )
-              )
-            }
+            onChange={(e) => setJobPost(e.target.value.slice(0, maxChars))}
             placeholder="Paste the full job description here..."
             className="w-full h-80 px-4 py-3 bg-white/5 border border-white/10 rounded-lg resize-none"
           />
 
           <div className="flex items-center justify-between">
             <span className="text-sm text-gray-400">
-              {charCount} / {maxChars}
-              characters
-              {charCount < minChars &&
-                ` (minimum ${minChars})`}
+              {charCount} / {maxChars} characters
+              {charCount < minChars && ` (minimum ${minChars})`}
             </span>
 
-            {!isValid &&
-              charCount > 0 && (
-                <span className="text-sm text-red-500">
-                  {charCount < minChars
-                    ? `Need ${
-                        minChars -
-                        charCount
-                      } more characters`
-                    : "Character limit exceeded"}
-                </span>
-              )}
+            {!isValid && charCount > 0 && (
+              <span className="text-sm text-red-500">
+                {charCount < minChars
+                  ? `Need ${minChars - charCount} more characters`
+                  : "Character limit exceeded"}
+              </span>
+            )}
           </div>
 
           {error && (
@@ -142,10 +125,7 @@ export function ScannerPage() {
 
           <button
             type="submit"
-            disabled={
-              !isValid ||
-              isAnalyzing
-            }
+            disabled={!isValid || isAnalyzing}
             className="w-full px-6 py-4 bg-red-600 hover:bg-red-700 disabled:bg-gray-600 disabled:cursor-not-allowed rounded-lg font-semibold"
           >
             Analyze Now
