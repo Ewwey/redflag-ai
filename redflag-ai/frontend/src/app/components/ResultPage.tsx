@@ -1,24 +1,40 @@
 import { useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useLocation, Navigate } from "react-router-dom";
 import { Navbar } from "./Navbar";
-import {
-  AlertTriangle,
-  ChevronDown,
-  ChevronUp,
-} from "lucide-react";
+import { AlertTriangle, ChevronDown, ChevronUp } from "lucide-react";
+
+interface RedFlagHit {
+  id: number;
+  phrase: string;
+  category: string;
+  explanation: string;
+  highlighted_text?: string;
+}
+
+interface ScanDataPayload {
+  id: number;
+  scam_score: number;
+  risk_level: string;
+  processing_status: string;
+  red_flags?: RedFlagHit[]; // Optional fallback container for Sprint 3 NLP integration
+}
 
 export function ResultPage() {
-  const [showDetailedReport, setShowDetailedReport] =
-    useState(false);
+  const [showDetailedReport, setShowDetailedReport] = useState(false);
+  const location = useLocation();
 
-  const score = 74;
+  // Safely grab backend response context from the router transition
+  const scanData = location.state?.scanData as ScanDataPayload | undefined;
 
-  const riskLevel =
-    score >= 70
-      ? "DANGER"
-      : score >= 40
-      ? "SUSPICIOUS"
-      : "SAFE";
+  // Route security guard: Redirect users back to scan page if they visit /result manually without context data
+  if (!scanData) {
+    return <Navigate to="/scan" replace />;
+  }
+
+  const score = scanData.scam_score ?? 0;
+  
+  // Normalizes backend casing ("Danger", "Suspicious", "Safe") into uppercase match formats
+  const riskLevel = (scanData.risk_level || "SAFE").toUpperCase();
 
   const riskColor =
     score >= 70
@@ -27,61 +43,20 @@ export function ResultPage() {
       ? "yellow"
       : "green";
 
-  const redFlags = [
-    {
-      phrase: "Asks to move to Telegram",
-      explanation:
-        "Scammers often move conversations off-platform to avoid detection and accountability.",
-    },
-    {
-      phrase: "Requires upfront payment",
-      explanation:
-        "Legitimate employers never ask you to pay for training materials, background checks, or equipment.",
-    },
-    {
-      phrase: "Promises unrealistic salary",
-      explanation:
-        "Offers of $5,000+/month for entry-level remote work with no experience are common red flags.",
-    },
-    {
-      phrase: "Vague job requirements",
-      explanation:
-        "Legitimate job posts have clear responsibilities and qualifications.",
-    },
-  ];
-
-  const detailedBreakdown = [
-    {
-      snippet:
-        "Contact us on Telegram @quickmoney2026 to get started immediately!",
-      flag: "Off-platform communication",
-    },
-    {
-      snippet:
-        "Only $99 registration fee to unlock your account and start earning",
-      flag: "Upfront payment required",
-    },
-    {
-      snippet:
-        "Earn $3,000-$8,000 per month working just 2 hours a day!",
-      flag: "Unrealistic compensation",
-    },
-  ];
+  // Safeguards arrays so interface doesn't throw a mapping error while Sprint 3 tasks are finalized
+  const redFlags = scanData.red_flags || [];
 
   return (
     <div className="min-h-screen bg-[#0D1117] text-white">
       <Navbar isLoggedIn userName="Juan D." />
 
       <div className="max-w-5xl mx-auto px-6 py-12">
-
         {/* Risk Gauge */}
         <div className="flex flex-col items-center mb-12">
           <RiskGauge score={score} />
 
           <div className="mt-6 text-center">
-            <div className="text-5xl font-bold mb-3">
-              {score} / 100
-            </div>
+            <div className="text-5xl font-bold mb-3">{score} / 100</div>
 
             <div
               className={`inline-block px-6 py-2 rounded-full font-bold text-lg ${
@@ -100,28 +75,22 @@ export function ResultPage() {
           <div className="flex justify-center gap-6 mt-6">
             <div className="flex items-center gap-2">
               <div className="w-3 h-3 rounded-full bg-green-500" />
-              <span className="text-sm text-gray-300">
-                Safe
-              </span>
+              <span className="text-sm text-gray-300">Safe</span>
             </div>
 
             <div className="flex items-center gap-2">
               <div className="w-3 h-3 rounded-full bg-yellow-500" />
-              <span className="text-sm text-gray-300">
-                Suspicious
-              </span>
+              <span className="text-sm text-gray-300">Suspicious</span>
             </div>
 
             <div className="flex items-center gap-2">
               <div className="w-3 h-3 rounded-full bg-red-500" />
-              <span className="text-sm text-gray-300">
-                Danger
-              </span>
+              <span className="text-sm text-gray-300">Danger</span>
             </div>
           </div>
         </div>
 
-        {/* Risk Summary */}
+        {/* Risk Summary Section */}
         <div
           className={`mb-12 rounded-xl border p-6 ${
             riskColor === "red"
@@ -131,9 +100,7 @@ export function ResultPage() {
               : "border-green-600/30 bg-green-600/10"
           }`}
         >
-          <h2 className="text-xl font-bold mb-3">
-            Risk Summary
-          </h2>
+          <h2 className="text-xl font-bold mb-3">Risk Summary</h2>
 
           <p className="text-gray-300">
             {riskLevel === "DANGER" &&
@@ -147,10 +114,10 @@ export function ResultPage() {
           </p>
         </div>
 
-        {/* Red Flags */}
+        {/* Red Flags Display Layer */}
         <div className="mb-12">
           <h2 className="text-3xl font-bold mb-6">
-            Red Flags Detected
+            {redFlags.length === 0 ? "No Red Flags Detected" : "Red Flags Detected"}
           </h2>
 
           <div className="space-y-4">
@@ -160,18 +127,18 @@ export function ResultPage() {
                 className="bg-white/5 border border-red-600/30 rounded-lg p-6"
               >
                 <div className="flex gap-4">
-                  <div className="w-10 h-10 rounded-full bg-red-600/20 flex items-center justify-center">
+                  <div className="w-10 h-10 rounded-full bg-red-600/20 flex items-center justify-center shrink-0">
                     <AlertTriangle className="w-5 h-5 text-red-600" />
                   </div>
 
                   <div>
+                    <span className="text-xs uppercase tracking-wider text-gray-400 font-semibold block mb-1">
+                      {flag.category}
+                    </span>
                     <h3 className="font-semibold text-lg mb-2 text-red-500">
                       {flag.phrase}
                     </h3>
-
-                    <p className="text-gray-300">
-                      {flag.explanation}
-                    </p>
+                    <p className="text-gray-300">{flag.explanation}</p>
                   </div>
                 </div>
               </div>
@@ -179,21 +146,14 @@ export function ResultPage() {
           </div>
         </div>
 
-        {/* Actions */}
+        {/* Action Toggle Layout */}
         <div className="flex flex-col sm:flex-row gap-4 mb-12">
           <button
-            onClick={() =>
-              setShowDetailedReport(
-                !showDetailedReport
-              )
-            }
-            className="flex-1 px-6 py-3 bg-white/5 border border-white/10 rounded-lg font-semibold flex items-center justify-center gap-2"
+            onClick={() => setShowDetailedReport(!showDetailedReport)}
+            disabled={redFlags.length === 0}
+            className="flex-1 px-6 py-3 bg-white/5 border border-white/10 disabled:opacity-40 disabled:cursor-not-allowed rounded-lg font-semibold flex items-center justify-center gap-2"
           >
-            {showDetailedReport
-              ? "Hide"
-              : "View"}{" "}
-            Full Report
-
+            {showDetailedReport ? "Hide" : "View"} Full Report
             {showDetailedReport ? (
               <ChevronUp className="w-5 h-5" />
             ) : (
@@ -209,43 +169,26 @@ export function ResultPage() {
           </Link>
         </div>
 
-        {/* Detailed Breakdown */}
-        {showDetailedReport && (
+        {/* Detailed Breakdown Dynamic Module */}
+        {showDetailedReport && redFlags.length > 0 && (
           <div className="bg-white/5 border border-white/10 rounded-lg p-6">
-            <h3 className="text-2xl font-bold mb-6">
-              Detailed Breakdown
-            </h3>
+            <h3 className="text-2xl font-bold mb-6">Detailed Breakdown</h3>
 
             <div className="space-y-6">
-              {detailedBreakdown.map(
-                (item, index) => (
-                  <div
-                    key={index}
-                    className="border-l-4 border-red-600 pl-4"
-                  >
-                    <div className="text-sm text-red-500 font-semibold mb-2 uppercase">
-                      {item.flag}
-                    </div>
-
-                    <div className="bg-white/5 rounded p-4 text-gray-300 italic">
-                      {item.snippet.includes(
-                        "Telegram"
-                      ) ? (
-                        <>
-                          Contact us on{" "}
-                          <span className="bg-red-600 text-white px-1 rounded">
-                            Telegram
-                          </span>{" "}
-                          @quickmoney2026 to get
-                          started immediately!
-                        </>
-                      ) : (
-                        item.snippet
-                      )}
-                    </div>
+              {redFlags.map((item, index) => (
+                <div key={index} className="border-l-4 border-red-600 pl-4">
+                  <div className="text-sm text-red-500 font-semibold mb-2 uppercase">
+                    {item.category || "NLP Flag Match"}
                   </div>
-                )
-              )}
+
+                  <div className="bg-white/5 rounded p-4 text-gray-300 italic">
+                    Matched Snippet Block:{" "}
+                    <span className="bg-red-600/20 text-red-400 px-1.5 py-0.5 rounded font-mono not-italic text-sm ml-1 border border-red-600/30">
+                      {item.highlighted_text || item.phrase}
+                    </span>
+                  </div>
+                </div>
+              ))}
             </div>
           </div>
         )}
@@ -254,23 +197,14 @@ export function ResultPage() {
   );
 }
 
-function RiskGauge({
-  score,
-}: {
-  score: number;
-}) {
+function RiskGauge({ score }: { score: number }) {
   const radius = 120;
   const strokeWidth = 20;
-  const normalizedRadius =
-    radius - strokeWidth / 2;
-  const circumference =
-    normalizedRadius * Math.PI;
+  const normalizedRadius = radius - strokeWidth / 2;
+  const circumference = normalizedRadius * Math.PI;
 
-  const percentage = score / 100;
-
-  const strokeDashoffset =
-    circumference -
-    percentage * circumference;
+  const percentage = Math.max(0, Math.min(score / 100, 1));
+  const strokeDashoffset = circumference - percentage * circumference;
 
   const getColor = () => {
     if (score >= 70) return "#DC2626";
@@ -280,17 +214,10 @@ function RiskGauge({
 
   return (
     <div className="relative">
-      <svg
-        height={radius + 20}
-        width={radius * 2 + 20}
-      >
+      <svg height={radius + 20} width={radius * 2 + 20}>
         <path
-          d={`M ${strokeWidth / 2 + 10} ${
-            radius + 10
-          } A ${normalizedRadius} ${normalizedRadius} 0 0 1 ${
-            radius * 2 -
-            strokeWidth / 2 +
-            10
+          d={`M ${strokeWidth / 2 + 10} ${radius + 10} A ${normalizedRadius} ${normalizedRadius} 0 0 1 ${
+            radius * 2 - strokeWidth / 2 + 10
           } ${radius + 10}`}
           fill="none"
           stroke="rgba(255,255,255,.1)"
@@ -299,12 +226,8 @@ function RiskGauge({
         />
 
         <path
-          d={`M ${strokeWidth / 2 + 10} ${
-            radius + 10
-          } A ${normalizedRadius} ${normalizedRadius} 0 0 1 ${
-            radius * 2 -
-            strokeWidth / 2 +
-            10
+          d={`M ${strokeWidth / 2 + 10} ${radius + 10} A ${normalizedRadius} ${normalizedRadius} 0 0 1 ${
+            radius * 2 - strokeWidth / 2 + 10
           } ${radius + 10}`}
           fill="none"
           stroke={getColor()}
@@ -313,8 +236,7 @@ function RiskGauge({
           strokeDasharray={`${circumference} ${circumference}`}
           strokeDashoffset={strokeDashoffset}
           style={{
-            transition:
-              "stroke-dashoffset 1s ease",
+            transition: "stroke-dashoffset 1s ease-in-out",
             transform: "scaleX(-1)",
             transformOrigin: "center",
           }}
