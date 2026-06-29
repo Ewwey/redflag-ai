@@ -13,9 +13,7 @@ export function ScannerPage() {
 
   const minChars = 50;
   const maxChars = 5000;
-
   const charCount = jobPost.length;
-
   const isValid = charCount >= minChars && charCount <= maxChars;
 
   const sanitizeInput = (text: string) => {
@@ -44,13 +42,10 @@ export function ScannerPage() {
     setIsAnalyzing(true);
 
     try {
-      // Pull endpoint base URL configured in Sprint 1 environment definitions
       const baseURL = import.meta.env.VITE_API_BASE_URL || "http://localhost:8000";
       
-      // Pull the user session token to fulfill Depends(get_current_user)
       const token = localStorage.getItem("token");
-
-      // Connects directly to the prefix="/scans" router path 
+      
       const response = await axios.post(
         `${baseURL}/scans`,
         { job_description: sanitizedText },
@@ -61,12 +56,11 @@ export function ScannerPage() {
         }
       );
 
-      // Successfully forward the database/NLP response payload to the ResultPage route
       navigate("/result", { state: { scanData: response.data } });
     } catch (err: any) {
       console.error("Scan analysis failed:", err);
       const serverMessage = err.response?.data?.detail || "Something went wrong during analysis. Please try again.";
-      setError(serverMessage);
+      setError(typeof serverMessage === "object" ? JSON.stringify(serverMessage) : serverMessage);
     } finally {
       setIsAnalyzing(false);
     }
@@ -81,7 +75,7 @@ export function ScannerPage() {
           <div className="text-center">
             <Loader2 className="w-16 h-16 text-red-600 animate-spin mx-auto mb-4" />
             <p className="text-xl text-gray-300">
-              Analyzing job post for red flags...
+              Running backend NLP analysis modules...
             </p>
           </div>
         </div>
@@ -89,7 +83,6 @@ export function ScannerPage() {
 
       <div className="max-w-4xl mx-auto px-6 py-12">
         <h1 className="text-4xl font-bold mb-2">Scan a Job Post</h1>
-
         <p className="text-gray-400 mb-8">
           Paste the job description below and our AI will analyze it for scam indicators.
         </p>
