@@ -13,28 +13,28 @@ interface RedFlagHit {
 
 interface ScanDataPayload {
   id: number;
-  scam_score: number;
-  risk_level: string;
-  processing_status: string;
-  red_flags?: RedFlagHit[]; // Optional fallback container for Sprint 3 NLP integration
+  scam_score?: number;
+  risk_level?: string;
+  processing_status?: string;
+  red_flags?: RedFlagHit[]; 
 }
 
 export function ResultPage() {
   const [showDetailedReport, setShowDetailedReport] = useState(false);
   const location = useLocation();
 
-  // Safely grab backend response context from the router transition
+  // Safely cast the incoming router location state
   const scanData = location.state?.scanData as ScanDataPayload | undefined;
 
-  // Route security guard: Redirect users back to scan page if they visit /result manually without context data
+  // Route Guard: If accessed directly without a scan transaction payload, redirect back to scanner
   if (!scanData) {
     return <Navigate to="/scan" replace />;
   }
 
+  // Fallbacks handle cases where backend values might be missing/null during development
   const score = scanData.scam_score ?? 0;
-  
-  // Normalizes backend casing ("Danger", "Suspicious", "Safe") into uppercase match formats
   const riskLevel = (scanData.risk_level || "SAFE").toUpperCase();
+  const redFlags = scanData.red_flags || [];
 
   const riskColor =
     score >= 70
@@ -43,15 +43,12 @@ export function ResultPage() {
       ? "yellow"
       : "green";
 
-  // Safeguards arrays so interface doesn't throw a mapping error while Sprint 3 tasks are finalized
-  const redFlags = scanData.red_flags || [];
-
   return (
     <div className="min-h-screen bg-[#0D1117] text-white">
       <Navbar isLoggedIn userName="Juan D." />
 
       <div className="max-w-5xl mx-auto px-6 py-12">
-        {/* Risk Gauge */}
+        {/* Visual Gauge Component */}
         <div className="flex flex-col items-center mb-12">
           <RiskGauge score={score} />
 
@@ -71,18 +68,16 @@ export function ResultPage() {
             </div>
           </div>
 
-          {/* Risk Legend */}
+          {/* Map Legends */}
           <div className="flex justify-center gap-6 mt-6">
             <div className="flex items-center gap-2">
               <div className="w-3 h-3 rounded-full bg-green-500" />
               <span className="text-sm text-gray-300">Safe</span>
             </div>
-
             <div className="flex items-center gap-2">
               <div className="w-3 h-3 rounded-full bg-yellow-500" />
               <span className="text-sm text-gray-300">Suspicious</span>
             </div>
-
             <div className="flex items-center gap-2">
               <div className="w-3 h-3 rounded-full bg-red-500" />
               <span className="text-sm text-gray-300">Danger</span>
@@ -90,7 +85,7 @@ export function ResultPage() {
           </div>
         </div>
 
-        {/* Risk Summary Section */}
+        {/* Dynamic Summary Panel */}
         <div
           className={`mb-12 rounded-xl border p-6 ${
             riskColor === "red"
@@ -101,20 +96,16 @@ export function ResultPage() {
           }`}
         >
           <h2 className="text-xl font-bold mb-3">Risk Summary</h2>
-
           <p className="text-gray-300">
-            {riskLevel === "DANGER" &&
-              "This job post contains multiple high-risk scam indicators. Proceed with extreme caution."}
-
-            {riskLevel === "SUSPICIOUS" &&
-              "Some suspicious patterns were detected. Verify the employer before continuing."}
-
-            {riskLevel === "SAFE" &&
-              "No major scam indicators were detected."}
+            {riskLevel === "DANGER" || riskLevel === "RED"
+              ? "This job post contains multiple high-risk scam indicators verified by our NLP layers. Proceed with extreme caution."
+              : riskLevel === "SUSPICIOUS" || riskLevel === "YELLOW"
+              ? "Some suspicious language or requests were detected. Verify the employer before sharing sensitive information."
+              : "No major threat patterns or systemic red flags were detected within this job text."}
           </p>
         </div>
 
-        {/* Red Flags Display Layer */}
+        {/* Flags Container */}
         <div className="mb-12">
           <h2 className="text-3xl font-bold mb-6">
             {redFlags.length === 0 ? "No Red Flags Detected" : "Red Flags Detected"}
@@ -130,10 +121,9 @@ export function ResultPage() {
                   <div className="w-10 h-10 rounded-full bg-red-600/20 flex items-center justify-center shrink-0">
                     <AlertTriangle className="w-5 h-5 text-red-600" />
                   </div>
-
                   <div>
                     <span className="text-xs uppercase tracking-wider text-gray-400 font-semibold block mb-1">
-                      {flag.category}
+                      {flag.category || "NLP Pattern Match"}
                     </span>
                     <h3 className="font-semibold text-lg mb-2 text-red-500">
                       {flag.phrase}
@@ -146,7 +136,7 @@ export function ResultPage() {
           </div>
         </div>
 
-        {/* Action Toggle Layout */}
+        {/* Form Controls */}
         <div className="flex flex-col sm:flex-row gap-4 mb-12">
           <button
             onClick={() => setShowDetailedReport(!showDetailedReport)}
@@ -154,11 +144,7 @@ export function ResultPage() {
             className="flex-1 px-6 py-3 bg-white/5 border border-white/10 disabled:opacity-40 disabled:cursor-not-allowed rounded-lg font-semibold flex items-center justify-center gap-2"
           >
             {showDetailedReport ? "Hide" : "View"} Full Report
-            {showDetailedReport ? (
-              <ChevronUp className="w-5 h-5" />
-            ) : (
-              <ChevronDown className="w-5 h-5" />
-            )}
+            {showDetailedReport ? <ChevronUp className="w-5 h-5" /> : <ChevronDown className="w-5 h-5" />}
           </button>
 
           <Link
@@ -169,20 +155,18 @@ export function ResultPage() {
           </Link>
         </div>
 
-        {/* Detailed Breakdown Dynamic Module */}
+        {/* Collapsible Details Module */}
         {showDetailedReport && redFlags.length > 0 && (
           <div className="bg-white/5 border border-white/10 rounded-lg p-6">
             <h3 className="text-2xl font-bold mb-6">Detailed Breakdown</h3>
-
             <div className="space-y-6">
               {redFlags.map((item, index) => (
                 <div key={index} className="border-l-4 border-red-600 pl-4">
                   <div className="text-sm text-red-500 font-semibold mb-2 uppercase">
-                    {item.category || "NLP Flag Match"}
+                    {item.category || "Flag Match"}
                   </div>
-
                   <div className="bg-white/5 rounded p-4 text-gray-300 italic">
-                    Matched Snippet Block:{" "}
+                    Matched Snippet:{" "}
                     <span className="bg-red-600/20 text-red-400 px-1.5 py-0.5 rounded font-mono not-italic text-sm ml-1 border border-red-600/30">
                       {item.highlighted_text || item.phrase}
                     </span>
@@ -224,7 +208,6 @@ function RiskGauge({ score }: { score: number }) {
           strokeWidth={strokeWidth}
           strokeLinecap="round"
         />
-
         <path
           d={`M ${strokeWidth / 2 + 10} ${radius + 10} A ${normalizedRadius} ${normalizedRadius} 0 0 1 ${
             radius * 2 - strokeWidth / 2 + 10
