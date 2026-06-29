@@ -4,7 +4,6 @@ import { Navbar } from "./Navbar";
 import { AlertTriangle, ChevronDown, ChevronUp } from "lucide-react";
 
 interface RedFlagHit {
-  id: number;
   phrase: string;
   category: string;
   explanation: string;
@@ -12,10 +11,9 @@ interface RedFlagHit {
 }
 
 interface ScanDataPayload {
-  id: number;
+  scan_id: number; 
   scam_score?: number;
   risk_level?: string;
-  processing_status?: string;
   red_flags?: RedFlagHit[]; 
 }
 
@@ -23,15 +21,15 @@ export function ResultPage() {
   const [showDetailedReport, setShowDetailedReport] = useState(false);
   const location = useLocation();
 
-  // Safely cast the incoming router location state
+  // Extract the live response payload forwarded from the ScannerPage network call
   const scanData = location.state?.scanData as ScanDataPayload | undefined;
 
-  // Route Guard: If accessed directly without a scan transaction payload, redirect back to scanner
-  if (!scanData) {
+  // Route Security Guard: Redirect back to scanner if accessed without a valid scan payload
+  if (!scanData || typeof scanData.scan_id === "undefined") {
     return <Navigate to="/scan" replace />;
   }
 
-  // Fallbacks handle cases where backend values might be missing/null during development
+  // Map real backend payload properties using robust development fallbacks
   const score = scanData.scam_score ?? 0;
   const riskLevel = (scanData.risk_level || "SAFE").toUpperCase();
   const redFlags = scanData.red_flags || [];
@@ -48,7 +46,7 @@ export function ResultPage() {
       <Navbar isLoggedIn userName="Juan D." />
 
       <div className="max-w-5xl mx-auto px-6 py-12">
-        {/* Visual Gauge Component */}
+        {/* Dynamic Risk Gauge */}
         <div className="flex flex-col items-center mb-12">
           <RiskGauge score={score} />
 
@@ -68,7 +66,7 @@ export function ResultPage() {
             </div>
           </div>
 
-          {/* Map Legends */}
+          {/* Scale Legend */}
           <div className="flex justify-center gap-6 mt-6">
             <div className="flex items-center gap-2">
               <div className="w-3 h-3 rounded-full bg-green-500" />
@@ -85,7 +83,7 @@ export function ResultPage() {
           </div>
         </div>
 
-        {/* Dynamic Summary Panel */}
+        {/* Dynamic Risk Summary Banner */}
         <div
           className={`mb-12 rounded-xl border p-6 ${
             riskColor === "red"
@@ -105,7 +103,7 @@ export function ResultPage() {
           </p>
         </div>
 
-        {/* Flags Container */}
+        {/* Red Flags Loop Display Module */}
         <div className="mb-12">
           <h2 className="text-3xl font-bold mb-6">
             {redFlags.length === 0 ? "No Red Flags Detected" : "Red Flags Detected"}
@@ -123,7 +121,7 @@ export function ResultPage() {
                   </div>
                   <div>
                     <span className="text-xs uppercase tracking-wider text-gray-400 font-semibold block mb-1">
-                      {flag.category || "NLP Pattern Match"}
+                      {flag.category || "NLP Indicator Pattern"}
                     </span>
                     <h3 className="font-semibold text-lg mb-2 text-red-500">
                       {flag.phrase}
@@ -136,7 +134,7 @@ export function ResultPage() {
           </div>
         </div>
 
-        {/* Form Controls */}
+        {/* Action Form Grid Controls */}
         <div className="flex flex-col sm:flex-row gap-4 mb-12">
           <button
             onClick={() => setShowDetailedReport(!showDetailedReport)}
@@ -155,7 +153,7 @@ export function ResultPage() {
           </Link>
         </div>
 
-        {/* Collapsible Details Module */}
+        {/* Collapsible NLP Text Highlighting Submodule */}
         {showDetailedReport && redFlags.length > 0 && (
           <div className="bg-white/5 border border-white/10 rounded-lg p-6">
             <h3 className="text-2xl font-bold mb-6">Detailed Breakdown</h3>
