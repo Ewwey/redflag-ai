@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, ReactNode } from "react";
 import { Navbar } from "./Navbar";
 import { Search, MessageSquare, DollarSign, Clock, Mail, AlertTriangle, CheckCircle, Eye, Shield, UserCheck, FileText } from "lucide-react";
 
@@ -9,13 +9,13 @@ interface RedFlag {
   category: string;
   explanation: string;
   whatToDo: string;
-  icon: React.ReactNode;
+  icon: ReactNode;
 }
 
 interface SafetyTip {
   title: string;
   description: string;
-  icon: React.ReactNode;
+  icon: ReactNode;
 }
 
 const redFlags: RedFlag[] = [
@@ -100,11 +100,19 @@ export function RedFlagGuidePage() {
   const [activeTab, setActiveTab] = useState<Tab>("red-flags");
   const [searchQuery, setSearchQuery] = useState("");
 
+  // Filter red flags based on search query
   const filteredRedFlags = redFlags.filter(
     (flag) =>
       flag.phrase.toLowerCase().includes(searchQuery.toLowerCase()) ||
       flag.category.toLowerCase().includes(searchQuery.toLowerCase()) ||
       flag.explanation.toLowerCase().includes(searchQuery.toLowerCase())
+  );
+
+  // Filter safety tips based on search query
+  const filteredSafetyTips = safetyTips.filter(
+    (tip) =>
+      tip.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      tip.description.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
   return (
@@ -117,7 +125,21 @@ export function RedFlagGuidePage() {
           Learn to identify job scams and protect yourself while searching for opportunities online.
         </p>
 
-        {/* Tabs */}
+        {/* Global Search Bar - Fixed to filter across both context modules natively */}
+        <div className="mb-8">
+          <div className="relative">
+            <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
+            <input
+              type="text"
+              placeholder={activeTab === "red-flags" ? "Search red flags..." : "Search safety tips..."}
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="w-full pl-12 pr-4 py-3 bg-white/5 border border-white/10 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-600 focus:border-transparent transition-all placeholder:text-gray-500"
+            />
+          </div>
+        </div>
+
+        {/* Navigation Tabs */}
         <div className="flex gap-2 mb-8 border-b border-white/10">
           <button
             onClick={() => setActiveTab("red-flags")}
@@ -133,7 +155,7 @@ export function RedFlagGuidePage() {
             onClick={() => setActiveTab("tips")}
             className={`px-6 py-3 font-semibold transition-colors border-b-2 ${
               activeTab === "tips"
-                ? "border-red-600 text-red-500"
+                ? "border-green-600 text-green-500"
                 : "border-transparent text-gray-400 hover:text-white"
             }`}
           >
@@ -141,47 +163,35 @@ export function RedFlagGuidePage() {
           </button>
         </div>
 
-        {/* Red Flags Tab */}
+        {/* Red Flags Content Segment */}
         {activeTab === "red-flags" && (
           <>
-            {/* Search Bar */}
-            <div className="mb-8">
-              <div className="relative">
-                <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
-                <input
-                  type="text"
-                  placeholder="Search red flags..."
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  className="w-full pl-12 pr-4 py-3 bg-white/5 border border-white/10 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-600 focus:border-transparent transition-all placeholder:text-gray-500"
-                />
-              </div>
-            </div>
-
-            {/* Red Flag Cards */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               {filteredRedFlags.map((flag, index) => (
                 <div
                   key={index}
-                  className="bg-white/5 border border-red-600/30 rounded-lg p-6 hover:border-red-600/50 transition-colors"
+                  className="bg-white/5 border border-red-600/20 rounded-lg p-6 hover:border-red-600/50 transition-colors flex flex-col justify-between"
                 >
-                  <div className="flex items-start gap-3 mb-3">
-                    <div className="w-10 h-10 bg-red-600/20 rounded-lg flex items-center justify-center flex-shrink-0 text-red-500">
-                      {flag.icon}
-                    </div>
-                    <div className="flex-1">
-                      <div className="text-xs uppercase text-red-500 font-semibold mb-1">
-                        {flag.category}
+                  <div>
+                    <div className="flex items-start gap-3 mb-3">
+                      <div className="w-10 h-10 bg-red-600/20 rounded-lg flex items-center justify-center flex-shrink-0 text-red-500">
+                        {flag.icon}
                       </div>
-                      <h3 className="text-lg font-semibold text-white mb-2">
-                        "{flag.phrase}"
-                      </h3>
+                      <div className="flex-1">
+                        <div className="text-xs uppercase text-red-500 font-semibold mb-1">
+                          {flag.category}
+                        </div>
+                        <h3 className="text-lg font-semibold text-white mb-2">
+                          "{flag.phrase}"
+                        </h3>
+                      </div>
                     </div>
+                    <p className="text-gray-300 mb-4 text-sm leading-relaxed">
+                      {flag.explanation}
+                    </p>
                   </div>
-                  <p className="text-gray-300 mb-3 text-sm leading-relaxed">
-                    {flag.explanation}
-                  </p>
-                  <div className="bg-green-600/10 border border-green-600/30 rounded-lg p-3">
+                  
+                  <div className="bg-green-600/10 border border-green-600/20 rounded-lg p-3 mt-auto">
                     <div className="text-xs uppercase text-green-500 font-semibold mb-1">
                       What to Do
                     </div>
@@ -199,26 +209,35 @@ export function RedFlagGuidePage() {
           </>
         )}
 
-        {/* Safety Tips Tab */}
+        {/* Safety Tips Content Segment */}
         {activeTab === "tips" && (
-          <div className="space-y-4">
-            {safetyTips.map((tip, index) => (
-              <div
-                key={index}
-                className="bg-white/5 border border-white/10 hover:border-green-600/50 rounded-lg p-6 transition-colors"
-              >
-                <div className="flex items-start gap-4">
-                  <div className="w-12 h-12 bg-green-600/20 rounded-lg flex items-center justify-center flex-shrink-0 text-green-500">
-                    {tip.icon}
-                  </div>
-                  <div className="flex-1">
-                    <h3 className="text-xl font-semibold mb-2">{tip.title}</h3>
-                    <p className="text-gray-300 leading-relaxed">{tip.description}</p>
+          <>
+            {/* Unified 2-Column Responsive Grid Layout to prevent tab shifting layout distortions */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              {filteredSafetyTips.map((tip, index) => (
+                <div
+                  key={index}
+                  className="bg-white/5 border border-green-600/20 hover:border-green-600/50 rounded-lg p-6 transition-colors"
+                >
+                  <div className="flex items-start gap-4">
+                    <div className="w-12 h-12 bg-green-600/20 rounded-lg flex items-center justify-center flex-shrink-0 text-green-500">
+                      {tip.icon}
+                    </div>
+                    <div className="flex-1">
+                      <h3 className="text-xl font-semibold mb-2 text-white">{tip.title}</h3>
+                      <p className="text-gray-300 text-sm leading-relaxed">{tip.description}</p>
+                    </div>
                   </div>
                 </div>
+              ))}
+            </div>
+
+            {filteredSafetyTips.length === 0 && (
+              <div className="text-center py-12 text-gray-400">
+                No safety tips found matching "{searchQuery}"
               </div>
-            ))}
-          </div>
+            )}
+          </>
         )}
       </div>
     </div>
