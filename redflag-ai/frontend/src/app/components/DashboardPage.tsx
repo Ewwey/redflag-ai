@@ -120,6 +120,35 @@ export function DashboardPage() {
         : dateA.getTime() - dateB.getTime();
     });
 
+    const formatScanDate = (dateStr: string) => {
+    const scanDate = new Date(dateStr);
+    const today = new Date();
+    const yesterday = new Date(today);
+    yesterday.setDate(today.getDate() - 1);
+
+    const isSameDay = (a: Date, b: Date) =>
+      a.getFullYear() === b.getFullYear() &&
+      a.getMonth() === b.getMonth() &&
+      a.getDate() === b.getDate();
+
+    if (isSameDay(scanDate, today)) return "Today";
+    if (isSameDay(scanDate, yesterday)) return "Yesterday";
+
+    const diffDays = Math.floor(
+      (today.getTime() - scanDate.getTime()) / (1000 * 60 * 60 * 24)
+    );
+
+    if (diffDays < 7) {
+      return scanDate.toLocaleDateString("en-US", { weekday: "long" });
+    }
+
+    return scanDate.toLocaleDateString("en-US", {
+      month: "short",
+      day: "numeric",
+      year: "numeric",
+    });
+  };
+
   const getRiskBadge = (
     level: Exclude<RiskLevel, "All">,
     score: number
