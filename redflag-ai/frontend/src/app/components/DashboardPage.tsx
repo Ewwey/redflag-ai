@@ -2,13 +2,15 @@ import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { Navbar } from "./Navbar";
 import { useAuth } from "../../hooks/useAuth";
+import axios from "axios";
 import {
   BarChart3,
   ShieldAlert,
   ShieldCheck,
   Eye,
   ArrowUpDown,
-  Filter
+  Filter,
+  Trash2
 } from "lucide-react";
 
 type RiskLevel = "All" | "Safe" | "Suspicious" | "Danger";
@@ -102,13 +104,40 @@ export function DashboardPage() {
   const { user, logout } = useAuth();
   const [filterLevel, setFilterLevel] = useState<RiskLevel>("All");
   const [sortOrder, setSortOrder] = useState<SortOrder>("Newest");
+  const [scans, setScans] = useState<ScanEntry[]>(mockScans);
+  const [scanToDelete, setScanToDelete] = useState<number | null>(null);
+  const [isDeleting, setIsDeleting] = useState(false);
 
   const handleLogout = () => {
     logout();
     navigate("/login");
   };
 
-  // View Scan Detail Feature: Forwards historical context object directly into the ResultPage view layout
+const handleDelete = async () => {
+  if (scanToDelete === null) return;
+  setIsDeleting(true);
+  await new Promise((resolve) => setTimeout(resolve, 800));
+  try {
+    const baseURL = import.meta.env.VITE_API_BASE_URL || "http://localhost:8000";
+    const storedUser = localStorage.getItem("redflagUser");
+    const token = storedUser ? JSON.parse(storedUser).token : null;
+    await axios.delete(`${baseURL}/scans/${scanToDelete}`, {
+      headers: { Authorization: `Bearer ${token}` },
+    });
+  } catch (err: any) {
+    if (err?.response?.status !== 404) {
+      console.error("Delete failed:", err);
+      setIsDeleting(false);
+      setScanToDelete(null);
+      return;
+    }
+  } finally {
+    setScans((prev) => prev.filter((s) => s.scan_id !== scanToDelete));
+    setIsDeleting(false);
+    setScanToDelete(null);
+  }
+};
+
   const handleViewDetails = (scan: ScanEntry) => {
     navigate("/result", {
       state: {
@@ -122,11 +151,11 @@ export function DashboardPage() {
     });
   };
 
-  const totalScans = mockScans.length;
-  const dangerResults = mockScans.filter((s) => s.risk_level === "Danger").length;
-  const safeResults = mockScans.filter((s) => s.risk_level === "Safe").length;
+  const totalScans = scans.length;
+  const dangerResults = scans.filter((s) => s.risk_level === "Danger").length;
+  const safeResults = scans.filter((s) => s.risk_level === "Safe").length;
 
-  const filteredScans = mockScans
+  const filteredScans = scans
     .filter((scan) => filterLevel === "All" || scan.risk_level === filterLevel)
     .sort((a, b) => {
       const dateA = new Date(a.date + " " + a.time);
@@ -160,7 +189,7 @@ export function DashboardPage() {
       <Navbar isLoggedIn userName={user?.name || user?.email || "Juan D."} />
 
       <div className="max-w-7xl mx-auto px-6 py-12">
-        {/* Header Module */}
+        {/* Header */}
         <div className="flex items-center justify-between mb-8">
           <h1 className="text-4xl font-bold">My Scan History</h1>
           <div className="flex gap-3">
@@ -173,7 +202,7 @@ export function DashboardPage() {
           </div>
         </div>
 
-        {/* Analytics Summary Panel */}
+        {/* Stats */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
           <div className="bg-white/5 border border-white/10 rounded-lg p-6">
             <div className="flex items-center gap-3 mb-2">
@@ -206,7 +235,7 @@ export function DashboardPage() {
           </div>
         </div>
 
-        {/* Data Filter Matrix Controls */}
+        {/* Filter + Sort Controls */}
         <div className="flex flex-col sm:flex-row gap-4 justify-between items-center bg-white/5 border border-white/10 rounded-lg p-4 mb-6">
           <div className="flex flex-wrap items-center gap-2 w-full sm:w-auto">
             <Filter className="w-4 h-4 text-gray-400 mr-2" />
@@ -236,7 +265,7 @@ export function DashboardPage() {
           </div>
         </div>
 
-        {/* History Log Data Table */}
+        {/* Scan History Table */}
         <div className="bg-white/5 border border-white/10 rounded-lg overflow-hidden">
           <div className="overflow-x-auto">
             <table className="w-full text-left border-collapse">
@@ -245,7 +274,7 @@ export function DashboardPage() {
                   <th className="p-4">Date Added</th>
                   <th className="p-4">Job Description Preview</th>
                   <th className="p-4">Threat Assessment</th>
-                  <th className="p-4 text-center">Action</th>
+                  <th className="p-4 text-center">Actions</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-white/5">
@@ -278,13 +307,22 @@ export function DashboardPage() {
                         </div>
                       </td>
                       <td className="p-4 whitespace-nowrap text-center">
-                        <button
-                          onClick={() => handleViewDetails(scan)}
-                          className="p-2 bg-white/5 hover:bg-red-600/20 border border-white/10 hover:border-red-600/40 rounded text-gray-400 hover:text-red-400 transition-all"
-                          title="View Scan Details"
-                        >
-                          <Eye className="w-4 h-4" />
-                        </button>
+                        <div className="flex items-center justify-center gap-2">
+                          <button
+                            onClick={() => handleViewDetails(scan)}
+                            className="p-2 bg-white/5 hover:bg-red-600/20 border border-white/10 hover:border-red-600/40 rounded text-gray-400 hover:text-red-400 transition-all"
+                            title="View Scan Details"
+                          >
+                            <Eye className="w-4 h-4" />
+                          </button>
+                          <button
+                            onClick={() => setScanToDelete(scan.scan_id)}
+                            className="p-2 bg-white/5 hover:bg-red-600/20 border border-white/10 hover:border-red-600/40 rounded text-gray-400 hover:text-red-400 transition-all"
+                            title="Delete Scan"
+                          >
+                            <Trash2 className="w-4 h-4" />
+                          </button>
+                        </div>
                       </td>
                     </tr>
                   );
@@ -300,6 +338,34 @@ export function DashboardPage() {
           )}
         </div>
       </div>
+
+      {/* Delete Confirmation Modal */}
+      {scanToDelete !== null && (
+        <div className="fixed inset-0 bg-black/70 backdrop-blur-sm z-50 flex items-center justify-center">
+          <div className="bg-[#161B22] border border-white/10 rounded-lg p-8 max-w-md w-full mx-4">
+            <h3 className="text-xl font-bold mb-2">Remove Scan?</h3>
+            <p className="text-gray-400 mb-6">
+              Are you sure you want to remove this scan? This action cannot be undone.
+            </p>
+            <div className="flex gap-3 justify-end">
+              <button
+                onClick={() => setScanToDelete(null)}
+                disabled={isDeleting}
+                className="px-5 py-2 bg-white/5 border border-white/10 hover:bg-white/10 rounded-lg font-semibold transition-colors"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleDelete}
+                disabled={isDeleting}
+                className="px-5 py-2 bg-red-600 hover:bg-red-700 disabled:bg-gray-600 rounded-lg font-semibold transition-colors"
+              >
+                {isDeleting ? "Removing..." : "Remove Scan"}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
