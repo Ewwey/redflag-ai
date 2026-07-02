@@ -44,7 +44,13 @@ export function ScannerPage() {
     try {
       const baseURL = import.meta.env.VITE_API_BASE_URL || "http://localhost:8000";
       
-      const token = localStorage.getItem("token");
+      //const token = localStorage.getItem("token");
+
+      const storedUser = localStorage.getItem("redflagUser");
+
+      const token = storedUser
+        ? JSON.parse(storedUser).token
+        : null;
       
       const response = await axios.post(
         `${baseURL}/scans`,

@@ -1,12 +1,14 @@
-import { useState } from "react";
+import { useState, useContext, useEffect } from "react";
+import { AuthContext } from "../../context/AuthContext";
 import { Navbar } from "./Navbar";
 import { CheckCircle, AlertCircle, User, Lock, AlertTriangle } from "lucide-react";
 
 type AlertType = "success" | "error" | null;
 
 export function SettingsPage() {
-  const [displayName, setDisplayName] = useState("Juan Dela Cruz");
-  const [email, setEmail] = useState("juan.delacruz@email.com");
+  const { user } = useContext(AuthContext) as any;
+  const [displayName, setDisplayName] = useState("");
+  const [email, setEmail] = useState("");
   const [currentPassword, setCurrentPassword] = useState("");
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
@@ -14,8 +16,22 @@ export function SettingsPage() {
   const [profileAlert, setProfileAlert] = useState<AlertType>(null);
   const [passwordAlert, setPasswordAlert] = useState<AlertType>(null);
 
+  useEffect(() => {
+    if (user) {
+      setDisplayName(
+        user.display_name ||
+        user.name ||
+        user.full_name ||
+        ""
+      );
+
+      setEmail(user.email || "");
+    }
+  }, [user]); 
+
   const handleProfileSave = (e: React.FormEvent) => {
     e.preventDefault();
+    // TODO: Call profile update API when backend is available.
     setProfileAlert("success");
     setTimeout(() => setProfileAlert(null), 3000);
   };
@@ -29,7 +45,7 @@ export function SettingsPage() {
       return;
     }
 
-    // Simulate password update
+    // TODO: Connect to Profile Update API (Sprint 4 - F7)
     setPasswordAlert("success");
     setCurrentPassword("");
     setNewPassword("");
@@ -39,7 +55,10 @@ export function SettingsPage() {
 
   return (
     <div className="min-h-screen bg-[#0D1117] text-white">
-      <Navbar isLoggedIn userName="Juan D." />
+      <Navbar
+        isLoggedIn={!!user}
+        userName={user?.display_name || user?.name || user?.email || "User"}
+      />
 
       <div className="max-w-4xl mx-auto px-6 py-12">
         <h1 className="text-4xl font-bold mb-2">Profile & Security Settings</h1>
