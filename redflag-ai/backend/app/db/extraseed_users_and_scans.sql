@@ -1,0 +1,115 @@
+USE redflag_ai;
+
+-- ============================================================
+-- SEED: 10 new users + 6 scans each (60 scans total)
+-- Passwords (plaintext for reference):
+--   maria.santos@gmail.com     -> hunter2026
+--   juan.dela.cruz@yahoo.com   -> redFlag!99
+--   ana.reyes@outlook.com      -> jobseeker1
+--   carlos.mendoza@gmail.com   -> scamAlert7
+--   liza.flores@gmail.com      -> safeJob@22
+--   mike.torres@yahoo.com      -> workHome55
+--   nina.garcia@outlook.com    -> passWord88
+--   ben.aquino@gmail.com       -> hiringNow3
+--   rose.villanueva@yahoo.com  -> fraudStop0
+--   joel.castro@gmail.com      -> careerX@44
+-- ============================================================
+
+INSERT INTO users (email, display_name, password_hash, created_at, updated_at) VALUES
+('maria.santos@gmail.com',    'Maria Santos',    '$2b$12$r0GFuHS80N83j477FbGuKOQ0SPbKYx4y9kYKNUUzQI2qFpa7Ljl8m', NOW(), NOW()),
+('juan.dela.cruz@yahoo.com',  'Juan Dela Cruz',  '$2b$12$G3g0KyfScX21rIfPmSH/YOBDbhQ5REP2.gJUlbDwCu/XsXHMihelC', NOW(), NOW()),
+('ana.reyes@outlook.com',     'Ana Reyes',       '$2b$12$2VhexT6fYhqZpZ5NPPUp/OdBI6T0305FErtAg9HUaRHH55pDdZVca', NOW(), NOW()),
+('carlos.mendoza@gmail.com',  'Carlos Mendoza',  '$2b$12$wdYsbJ02CFEL2IXkrDdjBOxJ4G3a0dPfJd0g02w.edpo0QetPlgHW', NOW(), NOW()),
+('liza.flores@gmail.com',     'Liza Flores',     '$2b$12$/5MRSd4B0OrRk3nhjkvSYukP8F9FSZTKBPDVZNX2TWVtrUQ1avexu', NOW(), NOW()),
+('mike.torres@yahoo.com',     'Mike Torres',     '$2b$12$nvc411ZGIqHsmHr2KnLojuqEPckTf7m0PG//50W9jnOn8fTX8bOsy', NOW(), NOW()),
+('nina.garcia@outlook.com',   'Nina Garcia',     '$2b$12$P1FZchQGFjGzeVhxlp8m5.UmiSsRb.CnoPLAebRiCOda3Xp23/4Ce', NOW(), NOW()),
+('ben.aquino@gmail.com',      'Ben Aquino',      '$2b$12$A6DRoBgIycoU5MQdXQbDO.MGoOwW7OrDUn4CRgFv9qkW2qdsHI0ZK', NOW(), NOW()),
+('rose.villanueva@yahoo.com', 'Rose Villanueva', '$2b$12$NQb8eeLF7r/QfCfccSK5hemR7maFbwYea2JlZRYLtx0b5RP3zMRxa', NOW(), NOW()),
+('joel.castro@gmail.com',     'Joel Castro',     '$2b$12$Pp/mvHK5fDXOwhp.My.Sk.uNrZN1cQjHvDbZOqoOaOTLxq515DY5u', NOW(), NOW());
+
+-- ============================================================
+-- Get the IDs of the users we just inserted
+-- They should be 5-14 if you already have 4 users (IDs 1-4)
+-- Adjust the user_id values below if your IDs are different
+-- ============================================================
+
+-- Maria Santos (user_id = 5)
+INSERT INTO scans (user_id, job_description, text_preview, scam_score, risk_level, processing_status, feedback_status, scanned_at, updated_at) VALUES
+(5, 'Urgent hiring! Work from home, earn $5000/month. No experience needed. Contact us on Telegram for the interview. Immediate start, no interview required. Send GCash deposit to activate account.', 'Urgent hiring! Work from home, earn $5000/month. No experience needed...', 91, 'Danger', 'Completed', 'None', NOW() - INTERVAL 1 DAY, NOW()),
+(5, 'Marketing Assistant needed for established tech company. 2+ years experience required. HMO and paid leaves included. Apply through our official careers portal at techcorp.com/careers.', 'Marketing Assistant needed for established tech company. 2+ years experience...', 10, 'Safe', 'Completed', 'None', NOW() - INTERVAL 2 DAY, NOW()),
+(5, 'Looking for virtual assistant. Flexible hours. Send resume to personal email address for consideration. Message on Viber for more details about the compensation package.', 'Looking for virtual assistant. Send resume to personal email address...', 52, 'Suspicious', 'Completed', 'None', NOW() - INTERVAL 3 DAY, NOW()),
+(5, 'Senior Software Engineer at TechCorp. Strong Python and React skills required. Competitive salary, remote friendly. Apply through our official careers portal.', 'Senior Software Engineer at TechCorp. Strong Python and React skills...', 7, 'Safe', 'Completed', 'None', NOW() - INTERVAL 4 DAY, NOW()),
+(5, 'Data entry job available! Must pay registration fee for background check. High earning potential, daily payout guaranteed. No experience needed, immediate start today!', 'Data entry job available! Must pay registration fee. High earning potential...', 88, 'Danger', 'Completed', 'None', NOW() - INTERVAL 5 DAY, NOW()),
+(5, 'Part-time customer service rep needed. Must have good communication skills. Interview via Zoom with HR team. Apply at careers.globalcorp.com with your updated resume.', 'Part-time customer service rep needed. Must have good communication skills...', 35, 'Suspicious', 'Completed', 'None', NOW() - INTERVAL 6 DAY, NOW()),
+
+-- Juan Dela Cruz (user_id = 6)
+(6, 'Easy money! Process payments and keep 10% commission. Quick start, no interview needed. Join this Telegram group for onboarding. Daily payout, no experience required!', 'Easy money! Process payments and keep 10% commission. No interview needed...', 95, 'Danger', 'Completed', 'None', NOW() - INTERVAL 1 DAY, NOW()),
+(6, 'Full stack developer wanted at Innovate PH. React and Node.js experience required. Salary negotiable based on experience. Email hr@innovateph.com with your portfolio link.', 'Full stack developer wanted at Innovate PH. React and Node.js experience...', 6, 'Safe', 'Completed', 'None', NOW() - INTERVAL 2 DAY, NOW()),
+(6, 'Work from home guaranteed! Earn passive income while sleeping. No experience needed, no interview required. Buy USDT to activate your trading account and start earning today.', 'Work from home guaranteed! Earn passive income while sleeping...', 97, 'Danger', 'Completed', 'None', NOW() - INTERVAL 3 DAY, NOW()),
+(6, 'Content writer needed for digital marketing agency. Must have strong English skills and portfolio. Send application to jobs@digitalagency.com. Full-time, remote setup available.', 'Content writer needed for digital marketing agency. Must have strong English...', 9, 'Safe', 'Completed', 'None', NOW() - INTERVAL 4 DAY, NOW()),
+(6, 'Hiring customer support agents. Must have a laptop and internet connection. Apply via email. Salary is 500 per day. Message on WhatsApp only for faster processing of applications.', 'Hiring customer support agents. Message on WhatsApp only for faster processing...', 48, 'Suspicious', 'Completed', 'None', NOW() - INTERVAL 5 DAY, NOW()),
+(6, 'Graphic designer for startup. Must know Figma and Adobe Suite. Portfolio required. Email design@startup.ph to apply. Competitive pay and flexible work arrangement available.', 'Graphic designer for startup. Must know Figma and Adobe Suite. Portfolio required...', 11, 'Safe', 'Completed', 'None', NOW() - INTERVAL 6 DAY, NOW()),
+
+-- Ana Reyes (user_id = 7)
+(7, 'Crypto investment job! Help clients manage their trading platform accounts. Buy USDT to get started. High commission daily payout. No interview required, urgent hiring today!', 'Crypto investment job! Buy USDT to get started. High commission daily payout...', 99, 'Danger', 'Completed', 'None', NOW() - INTERVAL 1 DAY, NOW()),
+(7, 'Accountant needed at Santos and Partners CPA firm. CPA board passer preferred. Email your resume to careers@santospartners.com. Office based in BGC, Taguig.', 'Accountant needed at Santos and Partners CPA firm. CPA board passer preferred...', 5, 'Safe', 'Completed', 'None', NOW() - INTERVAL 2 DAY, NOW()),
+(7, 'Online selling assistant needed. Must have Facebook account. No experience needed. Send personal information and government ID upfront via email for background verification.', 'Online selling assistant needed. Send personal information and government ID upfront...', 74, 'Danger', 'Completed', 'None', NOW() - INTERVAL 3 DAY, NOW()),
+(7, 'HR assistant role at manufacturing company in Laguna. With or without experience welcome to apply. Submit resume at hr@manufacturing.com. Benefits upon regularization.', 'HR assistant role at manufacturing company in Laguna. Submit resume at hr@...', 14, 'Safe', 'Completed', 'None', NOW() - INTERVAL 4 DAY, NOW()),
+(7, 'Sales agent for real estate company. Commission based. Must attend orientation first. Contact via personal email address provided. No office, work anywhere you like.', 'Sales agent for real estate company. Contact via personal email address...', 43, 'Suspicious', 'Completed', 'None', NOW() - INTERVAL 5 DAY, NOW()),
+(7, 'Admin staff needed for BPO company in Cebu. With or without BPO experience. Walk in interview Monday to Friday 9am to 5pm. Bring 2 copies of resume and valid ID.', 'Admin staff needed for BPO company in Cebu. Walk in interview Monday to Friday...', 16, 'Safe', 'Completed', 'None', NOW() - INTERVAL 6 DAY, NOW()),
+
+-- Carlos Mendoza (user_id = 8)
+(8, 'Watch videos and earn up to 50000 daily! No experience needed. Click buttons to complete optimization tasks and get paid. Send GCash number to activate your earning account now.', 'Watch videos and earn up to 50000 daily! Click buttons for optimization tasks...', 98, 'Danger', 'Completed', 'None', NOW() - INTERVAL 1 DAY, NOW()),
+(8, 'Java backend developer needed for fintech startup. 3 years experience required. Competitive salary and equity offered. Apply at jobs.fintechph.com with updated resume and portfolio.', 'Java backend developer needed for fintech startup. 3 years experience required...', 8, 'Safe', 'Completed', 'None', NOW() - INTERVAL 2 DAY, NOW()),
+(8, 'Hiring encoder for home-based data entry tasks. No experience needed. Must have own laptop. Salary released weekly via GCash. Interview on Skype, message me on Telegram to schedule.', 'Hiring encoder for home-based data entry tasks. Interview on Skype via Telegram...', 61, 'Suspicious', 'Completed', 'None', NOW() - INTERVAL 3 DAY, NOW()),
+(8, 'Project manager for construction firm. PMP certification preferred. Salary 80k to 120k per month. Send resume to pm@constructionph.com. Site based in Clark, Pampanga.', 'Project manager for construction firm. PMP certification preferred. 80k to 120k...', 4, 'Safe', 'Completed', 'None', NOW() - INTERVAL 4 DAY, NOW()),
+(8, 'Earn from home by liking and sharing posts! No experience needed, first come first served. Limited slots only. Send your details to activate your account via personal email address.', 'Earn from home by liking and sharing posts! First come first served, limited slots...', 85, 'Danger', 'Completed', 'None', NOW() - INTERVAL 5 DAY, NOW()),
+(8, 'Warehouse staff needed in Laguna. Physical work, shifting schedule. With SSS and Philhealth. Apply in person at the address provided or email warehouse@logistics.com.ph.', 'Warehouse staff needed in Laguna. Physical work, shifting schedule. With SSS...', 12, 'Safe', 'Completed', 'None', NOW() - INTERVAL 6 DAY, NOW()),
+
+-- Liza Flores (user_id = 9)
+(9, 'Recruitment scam alert test. Asking applicants to submit TIN number and copy of bank statement before interview. Also requests mother maiden name for account verification purposes.', 'Asking applicants to submit TIN number and copy of bank statement before interview...', 93, 'Danger', 'Completed', 'None', NOW() - INTERVAL 1 DAY, NOW()),
+(9, 'UX designer at product company. Portfolio of mobile and web projects required. Salary 60k to 90k depending on experience. Apply at design.productco.com/careers before July 31.', 'UX designer at product company. Portfolio of mobile and web projects required...', 6, 'Safe', 'Completed', 'None', NOW() - INTERVAL 2 DAY, NOW()),
+(9, 'Online tutor for English. Must be college graduate. Flexible schedule, work from home. Platform provided. Apply at tutor.platform.com. Must have good internet connection and headset.', 'Online tutor for English. Must be college graduate. Flexible schedule, work from home...', 13, 'Safe', 'Completed', 'None', NOW() - INTERVAL 3 DAY, NOW()),
+(9, 'Hiring social media manager. Must know Facebook Ads and content creation. Apply via email with portfolio. Contact recruiter via Viber for initial screening before formal interview.', 'Hiring social media manager. Contact recruiter via Viber for initial screening...', 39, 'Suspicious', 'Completed', 'None', NOW() - INTERVAL 4 DAY, NOW()),
+(9, 'Passive income opportunity! Join our trading platform. No experience needed. Daily payout guaranteed. Send me on Telegram and I will add you to our group for orientation today!', 'Passive income opportunity! Join our trading platform. Daily payout guaranteed...', 96, 'Danger', 'Completed', 'None', NOW() - INTERVAL 5 DAY, NOW()),
+(9, 'Medical receptionist needed at private clinic in Quezon City. With or without experience. Must be willing to be trained. Email resume to clinic@healthcareph.com for scheduling.', 'Medical receptionist needed at private clinic in Quezon City. Email resume to...', 8, 'Safe', 'Completed', 'None', NOW() - INTERVAL 6 DAY, NOW()),
+
+-- Mike Torres (user_id = 10)
+(10, 'High salary for students! Earn 50000 a month with no experience and no interview. Work from home guaranteed. Pay refundable insurance fee of 500 pesos to get started immediately.', 'High salary for students! Earn 50000 a month, no experience, no interview...', 94, 'Danger', 'Completed', 'None', NOW() - INTERVAL 1 DAY, NOW()),
+(10, 'Network engineer for telco company. CCNA certification required. Salary 45k to 65k. Apply at careers.telco.com.ph. Onsite in Makati with possibility of remote setup after probation.', 'Network engineer for telco company. CCNA certification required. 45k to 65k...', 7, 'Safe', 'Completed', 'None', NOW() - INTERVAL 2 DAY, NOW()),
+(10, 'Virtual assistant for Australian client. Must have good English, own laptop, and stable internet. 5 dollar per hour. Apply at va.platform.com. Background check required upon hiring.', 'Virtual assistant for Australian client. 5 dollar per hour. Apply at va.platform.com...', 18, 'Safe', 'Completed', 'None', NOW() - INTERVAL 3 DAY, NOW()),
+(10, 'Hiring for click button optimization tasks. Earn daily. No experience needed. Must deposit 200 USDT to start. Message on Telegram for onboarding instructions and group invitation link.', 'Hiring for click button optimization tasks. Must deposit 200 USDT to start...', 99, 'Danger', 'Completed', 'None', NOW() - INTERVAL 4 DAY, NOW()),
+(10, 'Bookkeeper for small business. Knowledgeable in QuickBooks or Xero preferred. Part time, work from home setup. Send resume to accounting@smallbiz.ph. Salary negotiable per arrangement.', 'Bookkeeper for small business. Send resume to accounting@smallbiz.ph...', 9, 'Safe', 'Completed', 'None', NOW() - INTERVAL 5 DAY, NOW()),
+(10, 'Home-based encoder needed. Must have own computer. Payment via GCash every Friday. Recruiter only available on Signal app. Apply now, limited slots, first come first served only!', 'Home-based encoder needed. Recruiter only available on Signal app. Limited slots...', 67, 'Suspicious', 'Completed', 'None', NOW() - INTERVAL 6 DAY, NOW()),
+
+-- Nina Garcia (user_id = 11)
+(11, 'Earn while sleeping! Passive income through our crypto trading platform. No experience needed. Contact via WhatsApp only. Buy USDT worth 1000 pesos to activate your trading account.', 'Earn while sleeping! Contact via WhatsApp only. Buy USDT to activate account...', 97, 'Danger', 'Completed', 'None', NOW() - INTERVAL 1 DAY, NOW()),
+(11, 'Customer success manager at SaaS company. 2 years experience in account management required. Remote work setup. Apply at careers.saascompany.com. Competitive salary and benefits package.', 'Customer success manager at SaaS company. 2 years experience required. Remote...', 5, 'Safe', 'Completed', 'None', NOW() - INTERVAL 2 DAY, NOW()),
+(11, 'Delivery rider wanted. Must have own motorcycle and valid license. Daily boundary system. Message recruiter on Viber to schedule interview. No registration fee required to apply.', 'Delivery rider wanted. Must have own motorcycle. Message recruiter on Viber...', 29, 'Suspicious', 'Completed', 'None', NOW() - INTERVAL 3 DAY, NOW()),
+(11, 'Send OTP to verify your employment application. This is required by the company HR system. Please also provide copy of bank statement and mother maiden name for background processing.', 'Send OTP to verify employment application. Provide bank statement and mother maiden name...', 100, 'Danger', 'Completed', 'None', NOW() - INTERVAL 4 DAY, NOW()),
+(11, 'Data analyst position at e-commerce company. SQL and Python skills required. Office based in Ortigas. Salary 40k to 60k. Send resume to data@ecommerce.com before end of the month.', 'Data analyst position at e-commerce company. SQL and Python skills required...', 6, 'Safe', 'Completed', 'None', NOW() - INTERVAL 5 DAY, NOW()),
+(11, 'Call center agent for US account. No experience needed. Must be willing to work night shift. Walk in Monday to Friday at our office in Eastwood. Bring resume and 2 valid IDs.', 'Call center agent for US account. Walk in Monday to Friday at our Eastwood office...', 15, 'Safe', 'Completed', 'None', NOW() - INTERVAL 6 DAY, NOW()),
+
+-- Ben Aquino (user_id = 12)
+(12, 'Quick money! Data entry task that pays 5000 per day. No experience needed. Pay account activation fee of 300 pesos via GCash. Immediate start today, no interview required at all!', 'Quick money! Data entry task pays 5000 per day. Pay activation fee via GCash...', 92, 'Danger', 'Completed', 'None', NOW() - INTERVAL 1 DAY, NOW()),
+(12, 'Mechanical engineer for manufacturing plant in Cavite. With at least 2 years experience. Salary 35k to 50k. Apply at hr@manufacturingcavite.com. Benefits upon regularization after 6 months.', 'Mechanical engineer for manufacturing plant in Cavite. 2 years experience required...', 7, 'Safe', 'Completed', 'None', NOW() - INTERVAL 2 DAY, NOW()),
+(12, 'SEO specialist needed for digital agency. Knowledge of Google Analytics required. Work from home setup. Apply by sending resume to seo@agency.ph. Portfolio of past projects required.', 'SEO specialist needed for digital agency. Apply by sending resume to seo@agency.ph...', 11, 'Safe', 'Completed', 'None', NOW() - INTERVAL 3 DAY, NOW()),
+(12, 'Applying for this job requires paying for your training materials upfront. Must also purchase software license worth 1500 pesos. Contact recruiter via personal email address provided below.', 'Requires paying for training materials upfront. Purchase software license 1500 pesos...', 86, 'Danger', 'Completed', 'None', NOW() - INTERVAL 4 DAY, NOW()),
+(12, 'Customer service for local company. Dayshift schedule, office based in Pasig. With or without experience. Interview via Zoom. Send resume to cs@localcompany.com. Salary plus allowances.', 'Customer service for local company. Interview via Zoom. Send resume to cs@...', 22, 'Suspicious', 'Completed', 'None', NOW() - INTERVAL 5 DAY, NOW()),
+(12, 'Digital marketing specialist for retail brand. Must know Facebook Ads, Google Ads, and email marketing. Office based in BGC. Apply at marketing@retailbrand.com with portfolio attached.', 'Digital marketing specialist for retail brand. Apply at marketing@retailbrand.com...', 8, 'Safe', 'Completed', 'None', NOW() - INTERVAL 6 DAY, NOW()),
+
+-- Rose Villanueva (user_id = 13)
+(13, 'Join our investment group on Telegram! Earn daily through crypto trading platform. No experience needed. Guaranteed high salary for students and fresh grads. Urgent hiring, limited slots only!', 'Join investment group on Telegram! Earn daily through crypto trading platform...', 95, 'Danger', 'Completed', 'None', NOW() - INTERVAL 1 DAY, NOW()),
+(13, 'Registered nurse for private hospital in Manila. PRC license required. Salary 25k to 35k plus night differential. Apply at hr@privatehospital.com. With government mandated benefits.', 'Registered nurse for private hospital in Manila. PRC license required. 25k to 35k...', 5, 'Safe', 'Completed', 'None', NOW() - INTERVAL 2 DAY, NOW()),
+(13, 'Online English teacher for Korean students. Bachelor degree required. Flexible part time schedule. Platform and students provided. Apply at teach.platform.com. Stable internet required.', 'Online English teacher for Korean students. Bachelor degree required. Flexible...', 10, 'Safe', 'Completed', 'None', NOW() - INTERVAL 3 DAY, NOW()),
+(13, 'Homebased data entry work. Must have own laptop. Pay is 300 per hour. Recruiter will contact you via add me on Signal app. No registration fee. Interview on Skype to be scheduled.', 'Homebased data entry work. Recruiter will contact via Signal app. Interview on Skype...', 55, 'Suspicious', 'Completed', 'None', NOW() - INTERVAL 4 DAY, NOW()),
+(13, 'Financial advisor trainee at insurance company. No experience needed but must be willing to attend training. Commission based earnings. Email your resume to recruit@insurance.com.ph.', 'Financial advisor trainee at insurance company. Commission based earnings...', 20, 'Suspicious', 'Completed', 'None', NOW() - INTERVAL 5 DAY, NOW()),
+(13, 'Receptionist for law firm in Makati. Must be presentable and with good communication skills. Office hours Monday to Friday 8am to 5pm. Send resume to admin@lawfirm.com.ph today.', 'Receptionist for law firm in Makati. Send resume to admin@lawfirm.com.ph...', 6, 'Safe', 'Completed', 'None', NOW() - INTERVAL 6 DAY, NOW()),
+
+-- Joel Castro (user_id = 14)
+(14, 'Hiring now! No experience needed. Earn 50000 a month working from home. No interview required. Move to Telegram for onboarding. Send GCash details and government ID to start today!', 'Hiring now! No experience needed. Earn 50000 from home. Move to Telegram...', 98, 'Danger', 'Completed', 'None', NOW() - INTERVAL 1 DAY, NOW()),
+(14, 'iOS developer for app startup. Swift experience required. Equity and competitive salary offered. Apply at jobs.appstartup.com. Remote work setup, flexible hours, collaborative team culture.', 'iOS developer for app startup. Swift experience required. Equity and competitive...', 7, 'Safe', 'Completed', 'None', NOW() - INTERVAL 2 DAY, NOW()),
+(14, 'Production staff for food manufacturing company in Laguna. No experience needed. With SSS, Philhealth, and Pagibig. Apply in person or send resume to production@foodcompany.com.', 'Production staff for food manufacturing company in Laguna. With SSS, Philhealth...', 13, 'Safe', 'Completed', 'None', NOW() - INTERVAL 3 DAY, NOW()),
+(14, 'Part time encoder work from home. Payment every Friday via GCash. No experience needed. Must attend online orientation first. Contact recruiter via personal email address for details.', 'Part time encoder work from home. Contact recruiter via personal email address...', 44, 'Suspicious', 'Completed', 'None', NOW() - INTERVAL 4 DAY, NOW()),
+(14, 'Earn from home doing optimization tasks! Click buttons and watch videos for daily payout. No experience needed. Send me on Telegram and I will add you to our earning group today!', 'Earn from home doing optimization tasks! Send me on Telegram for earning group...', 96, 'Danger', 'Completed', 'None', NOW() - INTERVAL 5 DAY, NOW()),
+(14, 'Purchasing officer for retail chain. With 2 years experience in procurement. Salary 30k to 40k. Apply at purchasing@retailchain.com.ph. Office based in Quezon City, Monday to Friday.', 'Purchasing officer for retail chain. 2 years experience in procurement required...', 8, 'Safe', 'Completed', 'None', NOW() - INTERVAL 6 DAY, NOW());

@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { Navbar } from "./Navbar";
 import { useAuth } from "../../hooks/useAuth";
@@ -10,7 +10,8 @@ import {
   Eye,
   ArrowUpDown,
   Filter,
-  Trash2
+  Trash2,
+  Loader2
 } from "lucide-react";
 
 type RiskLevel = "All" | "Safe" | "Suspicious" | "Danger";
@@ -24,18 +25,21 @@ interface RedFlagHit {
 }
 
 interface ScanEntry {
-  scan_id: number;
-  date: string;
-  time: string;
+  id: number;
+  scan_id?: number;
+  scanned_at?: string;
+  date?: string;
+  time?: string;
   job_description: string;
+  text_preview?: string;
   risk_level: string;
   scam_score: number;
-  red_flags: RedFlagHit[];
+  red_flags?: RedFlagHit[];
 }
 
 const mockScans: ScanEntry[] = [
   {
-    scan_id: 1,
+    id: 1,
     date: "2026-06-07",
     time: "3:45 PM",
     job_description: "Urgent hiring! Work from home, earn $5000/month. No experience needed. Contact us on Telegram...",
@@ -47,7 +51,7 @@ const mockScans: ScanEntry[] = [
     ]
   },
   {
-    scan_id: 2,
+    id: 2,
     date: "2026-06-06",
     time: "10:22 AM",
     job_description: "Marketing Assistant needed for established tech company. 2+ years experience required. Benefits include...",
@@ -56,7 +60,7 @@ const mockScans: ScanEntry[] = [
     red_flags: []
   },
   {
-    scan_id: 3,
+    id: 3,
     date: "2026-06-05",
     time: "2:15 PM",
     job_description: "Data entry position available. Must pay $50 registration fee for background check. High earning potential...",
@@ -67,7 +71,7 @@ const mockScans: ScanEntry[] = [
     ]
   },
   {
-    scan_id: 4,
+    id: 4,
     date: "2026-06-04",
     time: "11:30 AM",
     job_description: "Looking for virtual assistant. Must be available flexible hours. Send resume to personal email for consideration...",
@@ -78,7 +82,7 @@ const mockScans: ScanEntry[] = [
     ]
   },
   {
-    scan_id: 5,
+    id: 5,
     date: "2026-06-03",
     time: "4:50 PM",
     job_description: "Senior Software Engineer at Acme Corp. Strong Python and React skills required. Apply through our careers portal...",
@@ -87,7 +91,7 @@ const mockScans: ScanEntry[] = [
     red_flags: []
   },
   {
-    scan_id: 6,
+    id: 6,
     date: "2026-06-02",
     time: "9:10 AM",
     job_description: "Easy money! Just process payments and keep 10% commission. Quick start, no interview needed...",
@@ -101,92 +105,150 @@ const mockScans: ScanEntry[] = [
 
 export function DashboardPage() {
   const navigate = useNavigate();
-  const { user, logout } = useAuth();
+  const { user, logout } = useAuth() as { user: any; logout: () => void };
+
   const [filterLevel, setFilterLevel] = useState<RiskLevel>("All");
   const [sortOrder, setSortOrder] = useState<SortOrder>("Newest");
-  const [scans, setScans] = useState<ScanEntry[]>(mockScans);
+  const [scans, setScans] = useState<ScanEntry[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [fetchError, setFetchError] = useState("");
+  const [usingMock, setUsingMock] = useState(false);
   const [scanToDelete, setScanToDelete] = useState<number | null>(null);
   const [isDeleting, setIsDeleting] = useState(false);
+
+  useEffect(() => {
+    const fetchScans = async () => {
+      setLoading(true);
+      setFetchError("");
+      try {
+        const baseURL = import.meta.env.VITE_API_BASE_URL || "http://localhost:8000";
+        const storedUser = localStorage.getItem("redflagUser");
+        const token = storedUser ? JSON.parse(storedUser).token : null;
+
+        const params: Record<string, string> = {
+          sort: sortOrder === "Newest" ? "newest" : "oldest",
+        };
+        if (filterLevel !== "All") {
+          params.risk_level = filterLevel;
+        }
+
+        const response = await axios.get(`${baseURL}/scans/`, {
+          headers: { Authorization: `Bearer ${token}` },
+          params,
+        });
+
+        if (response.data && response.data.length > 0) {
+          setScans(response.data);
+          setUsingMock(false);
+        } else {
+          // No real scans yet — fall back to mock data so the UI isn't empty
+          setScans(mockScans);
+          setUsingMock(true);
+        }
+      } catch (err) {
+        console.error("Failed to fetch scans:", err);
+        // API failed — fall back to mock data
+        setScans(mockScans);
+        setUsingMock(true);
+        setFetchError("Could not connect to server. Showing sample data.");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchScans();
+  }, [filterLevel, sortOrder]);
 
   const handleLogout = () => {
     logout();
     navigate("/login");
   };
 
-const handleDelete = async () => {
-  if (scanToDelete === null) return;
-  setIsDeleting(true);
-  await new Promise((resolve) => setTimeout(resolve, 800));
-  try {
-    const baseURL = import.meta.env.VITE_API_BASE_URL || "http://localhost:8000";
-    const storedUser = localStorage.getItem("redflagUser");
-    const token = storedUser ? JSON.parse(storedUser).token : null;
-    await axios.delete(`${baseURL}/scans/${scanToDelete}`, {
-      headers: { Authorization: `Bearer ${token}` },
-    });
-  } catch (err: any) {
-    if (err?.response?.status !== 404) {
-      console.error("Delete failed:", err);
+  const getScanId = (scan: ScanEntry) => scan.scan_id ?? scan.id;
+
+  const handleDelete = async () => {
+    if (scanToDelete === null) return;
+    setIsDeleting(true);
+    await new Promise((resolve) => setTimeout(resolve, 800));
+    try {
+      if (!usingMock) {
+        const baseURL = import.meta.env.VITE_API_BASE_URL || "http://localhost:8000";
+        const storedUser = localStorage.getItem("redflagUser");
+        const token = storedUser ? JSON.parse(storedUser).token : null;
+        await axios.delete(`${baseURL}/scans/${scanToDelete}`, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+      }
+    } catch (err: any) {
+      if (err?.response?.status !== 404) {
+        console.error("Delete failed:", err);
+        setIsDeleting(false);
+        setScanToDelete(null);
+        return;
+      }
+    } finally {
+      setScans((prev) => prev.filter((s) => getScanId(s) !== scanToDelete));
       setIsDeleting(false);
       setScanToDelete(null);
-      return;
     }
-  } finally {
-    setScans((prev) => prev.filter((s) => s.scan_id !== scanToDelete));
-    setIsDeleting(false);
-    setScanToDelete(null);
-  }
-};
+  };
 
   const handleViewDetails = (scan: ScanEntry) => {
     navigate("/result", {
       state: {
         scanData: {
-          scan_id: scan.scan_id,
+          scan_id: getScanId(scan),
           scam_score: scan.scam_score,
           risk_level: scan.risk_level,
-          red_flags: scan.red_flags
-        }
-      }
+          red_flags: scan.red_flags ?? [],
+        },
+      },
     });
   };
+
+  const formatScanDate = (scan: ScanEntry) => {
+    const raw = scan.scanned_at ?? (scan.date ? scan.date + " " + (scan.time ?? "") : null);
+    if (!raw) return "Unknown";
+    const scanDate = new Date(raw);
+    const today = new Date();
+    const yesterday = new Date(today);
+    yesterday.setDate(today.getDate() - 1);
+    const isSameDay = (a: Date, b: Date) =>
+      a.getFullYear() === b.getFullYear() &&
+      a.getMonth() === b.getMonth() &&
+      a.getDate() === b.getDate();
+    if (isSameDay(scanDate, today)) return "Today";
+    if (isSameDay(scanDate, yesterday)) return "Yesterday";
+    return scanDate.toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" });
+  };
+
+  const formatScanTime = (scan: ScanEntry) => {
+    if (scan.scanned_at) {
+      return new Date(scan.scanned_at).toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit" });
+    }
+    return scan.time ?? "";
+  };
+
+  // Client-side filter+sort for mock data (real data is filtered by backend)
+  const displayedScans = usingMock
+    ? scans
+        .filter((s) => filterLevel === "All" || s.risk_level === filterLevel)
+        .sort((a, b) => {
+          const rawA = a.date ? a.date + " " + (a.time ?? "") : "";
+          const rawB = b.date ? b.date + " " + (b.time ?? "") : "";
+          const dateA = new Date(rawA).getTime();
+          const dateB = new Date(rawB).getTime();
+          return sortOrder === "Newest" ? dateB - dateA : dateA - dateB;
+        })
+    : scans;
 
   const totalScans = scans.length;
   const dangerResults = scans.filter((s) => s.risk_level === "Danger").length;
   const safeResults = scans.filter((s) => s.risk_level === "Safe").length;
 
-  const filteredScans = scans
-    .filter((scan) => filterLevel === "All" || scan.risk_level === filterLevel)
-    .sort((a, b) => {
-      const dateA = new Date(a.date + " " + a.time);
-      const dateB = new Date(b.date + " " + b.time);
-      return sortOrder === "Newest" ? dateB.getTime() - dateA.getTime() : dateA.getTime() - dateB.getTime();
-    });
-
-  const formatScanDate = (dateStr: string) => {
-    const scanDate = new Date(dateStr);
-    const today = new Date();
-    const yesterday = new Date(today);
-    yesterday.setDate(today.getDate() - 1);
-
-    const isSameDay = (a: Date, b: Date) =>
-      a.getFullYear() === b.getFullYear() &&
-      a.getMonth() === b.getMonth() &&
-      a.getDate() === b.getDate();
-
-    if (isSameDay(scanDate, today)) return "Today";
-    if (isSameDay(scanDate, yesterday)) return "Yesterday";
-
-    return scanDate.toLocaleDateString("en-US", {
-      month: "short",
-      day: "numeric",
-      year: "numeric",
-    });
-  };
-
   return (
     <div className="min-h-screen bg-[#0D1117] text-white">
-      <Navbar isLoggedIn userName={user?.name || user?.email || "Juan D."} />
+      <Navbar isLoggedIn userName={user?.name || user?.email || "User"} />
 
       <div className="max-w-7xl mx-auto px-6 py-12">
         {/* Header */}
@@ -201,6 +263,13 @@ const handleDelete = async () => {
             </button>
           </div>
         </div>
+
+        {/* Mock data notice */}
+        {usingMock && (
+          <div className="mb-6 p-3 bg-yellow-600/10 border border-yellow-600/30 rounded-lg text-yellow-500 text-sm">
+            {fetchError || "No scan history found. Showing sample data — run a real scan to populate your history!"}
+          </div>
+        )}
 
         {/* Stats */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
@@ -235,7 +304,7 @@ const handleDelete = async () => {
           </div>
         </div>
 
-        {/* Filter + Sort Controls */}
+        {/* Filter + Sort */}
         <div className="flex flex-col sm:flex-row gap-4 justify-between items-center bg-white/5 border border-white/10 rounded-lg p-4 mb-6">
           <div className="flex flex-wrap items-center gap-2 w-full sm:w-auto">
             <Filter className="w-4 h-4 text-gray-400 mr-2" />
@@ -251,7 +320,6 @@ const handleDelete = async () => {
               </button>
             ))}
           </div>
-
           <div className="flex items-center gap-2 w-full sm:w-auto justify-end">
             <ArrowUpDown className="w-4 h-4 text-gray-400" />
             <select
@@ -265,75 +333,84 @@ const handleDelete = async () => {
           </div>
         </div>
 
-        {/* Scan History Table */}
+        {/* Table */}
         <div className="bg-white/5 border border-white/10 rounded-lg overflow-hidden">
-          <div className="overflow-x-auto">
-            <table className="w-full text-left border-collapse">
-              <thead>
-                <tr className="border-b border-white/10 bg-white/5 text-gray-400 text-sm font-medium">
-                  <th className="p-4">Date Added</th>
-                  <th className="p-4">Job Description Preview</th>
-                  <th className="p-4">Threat Assessment</th>
-                  <th className="p-4 text-center">Actions</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-white/5">
-                {filteredScans.map((scan) => {
-                  const badgeColors = {
-                    Safe: "bg-green-600/20 text-green-500 border-green-600/30",
-                    Suspicious: "bg-yellow-600/20 text-yellow-500 border-yellow-600/30",
-                    Danger: "bg-red-600/20 text-red-500 border-red-600/30",
-                  }[scan.risk_level] || "bg-gray-600/20 text-gray-400 border-gray-600/30";
+          {loading && (
+            <div className="flex items-center justify-center py-16 gap-3 text-gray-400">
+              <Loader2 className="w-5 h-5 animate-spin" />
+              <span className="text-sm">Loading scan history...</span>
+            </div>
+          )}
 
-                  return (
-                    <tr key={scan.scan_id} className="hover:bg-white/[0.02] transition-colors group">
-                      <td className="p-4 whitespace-nowrap text-sm text-gray-300">
-                        <div>{formatScanDate(scan.date)}</div>
-                        <div className="text-xs text-gray-500">{scan.time}</div>
-                      </td>
-                      <td className="p-4 max-w-md">
-                        <p className="text-sm text-gray-300 truncate italic">
-                          "{scan.job_description}"
-                        </p>
-                      </td>
-                      <td className="p-4 whitespace-nowrap">
-                        <div className="flex items-center gap-3">
-                          <span className={`px-2.5 py-0.5 rounded-full text-xs font-bold border ${badgeColors}`}>
-                            {scan.risk_level.toUpperCase()}
-                          </span>
-                          <span className="text-sm font-semibold text-gray-400">
-                            {scan.scam_score}/100
-                          </span>
-                        </div>
-                      </td>
-                      <td className="p-4 whitespace-nowrap text-center">
-                        <div className="flex items-center justify-center gap-2">
-                          <button
-                            onClick={() => handleViewDetails(scan)}
-                            className="p-2 bg-white/5 hover:bg-red-600/20 border border-white/10 hover:border-red-600/40 rounded text-gray-400 hover:text-red-400 transition-all"
-                            title="View Scan Details"
-                          >
-                            <Eye className="w-4 h-4" />
-                          </button>
-                          <button
-                            onClick={() => setScanToDelete(scan.scan_id)}
-                            className="p-2 bg-white/5 hover:bg-red-600/20 border border-white/10 hover:border-red-600/40 rounded text-gray-400 hover:text-red-400 transition-all"
-                            title="Delete Scan"
-                          >
-                            <Trash2 className="w-4 h-4" />
-                          </button>
-                        </div>
-                      </td>
-                    </tr>
-                  );
-                })}
-              </tbody>
-            </table>
-          </div>
-
-          {filteredScans.length === 0 && (
+          {!loading && displayedScans.length === 0 && (
             <div className="text-center py-12 text-gray-500 text-sm">
-              No historical entries match your current tracking criteria.
+              No scans match your current filter.
+            </div>
+          )}
+
+          {!loading && displayedScans.length > 0 && (
+            <div className="overflow-x-auto">
+              <table className="w-full text-left border-collapse">
+                <thead>
+                  <tr className="border-b border-white/10 bg-white/5 text-gray-400 text-sm font-medium">
+                    <th className="p-4">Date Added</th>
+                    <th className="p-4">Job Description Preview</th>
+                    <th className="p-4">Threat Assessment</th>
+                    <th className="p-4 text-center">Actions</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-white/5">
+                  {displayedScans.map((scan) => {
+                    const badgeColors = {
+                      Safe: "bg-green-600/20 text-green-500 border-green-600/30",
+                      Suspicious: "bg-yellow-600/20 text-yellow-500 border-yellow-600/30",
+                      Danger: "bg-red-600/20 text-red-500 border-red-600/30",
+                    }[scan.risk_level] || "bg-gray-600/20 text-gray-400 border-gray-600/30";
+
+                    return (
+                      <tr key={getScanId(scan)} className="hover:bg-white/[0.02] transition-colors">
+                        <td className="p-4 whitespace-nowrap text-sm text-gray-300">
+                          <div>{formatScanDate(scan)}</div>
+                          <div className="text-xs text-gray-500">{formatScanTime(scan)}</div>
+                        </td>
+                        <td className="p-4 max-w-md">
+                          <p className="text-sm text-gray-300 truncate italic">
+                            "{scan.text_preview || scan.job_description}"
+                          </p>
+                        </td>
+                        <td className="p-4 whitespace-nowrap">
+                          <div className="flex items-center gap-3">
+                            <span className={`px-2.5 py-0.5 rounded-full text-xs font-bold border ${badgeColors}`}>
+                              {scan.risk_level.toUpperCase()}
+                            </span>
+                            <span className="text-sm font-semibold text-gray-400">
+                              {scan.scam_score}/100
+                            </span>
+                          </div>
+                        </td>
+                        <td className="p-4 whitespace-nowrap text-center">
+                          <div className="flex items-center justify-center gap-2">
+                            <button
+                              onClick={() => handleViewDetails(scan)}
+                              className="p-2 bg-white/5 hover:bg-red-600/20 border border-white/10 hover:border-red-600/40 rounded text-gray-400 hover:text-red-400 transition-all"
+                              title="View Scan Details"
+                            >
+                              <Eye className="w-4 h-4" />
+                            </button>
+                            <button
+                              onClick={() => setScanToDelete(getScanId(scan))}
+                              className="p-2 bg-white/5 hover:bg-red-600/20 border border-white/10 hover:border-red-600/40 rounded text-gray-400 hover:text-red-400 transition-all"
+                              title="Delete Scan"
+                            >
+                              <Trash2 className="w-4 h-4" />
+                            </button>
+                          </div>
+                        </td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
             </div>
           )}
         </div>
