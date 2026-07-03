@@ -2,6 +2,7 @@ import { useState, useContext, useEffect } from "react";
 import { AuthContext } from "../../context/AuthContext";
 import { Navbar } from "./Navbar";
 import { CheckCircle, AlertCircle, User, Lock, AlertTriangle } from "lucide-react";
+import axios from "axios";
 
 type AlertType = "success" | "error" | null;
 
@@ -14,43 +15,91 @@ export function SettingsPage() {
   const [confirmPassword, setConfirmPassword] = useState("");
 
   const [profileAlert, setProfileAlert] = useState<AlertType>(null);
+  const [profileMessage, setProfileMessage] = useState("");
   const [passwordAlert, setPasswordAlert] = useState<AlertType>(null);
+  const [passwordMessage, setPasswordMessage] = useState("");
+
+  const [profileLoading, setProfileLoading] = useState(false);
+  const [passwordLoading, setPasswordLoading] = useState(false);
 
   useEffect(() => {
     if (user) {
-      setDisplayName(
-        user.display_name ||
-        user.name ||
-        user.full_name ||
-        ""
-      );
-
+      setDisplayName(user.display_name || user.name || user.full_name || "");
       setEmail(user.email || "");
     }
-  }, [user]); 
+  }, [user]);
 
-  const handleProfileSave = (e: React.FormEvent) => {
-    e.preventDefault();
-    // TODO: Call profile update API when backend is available.
-    setProfileAlert("success");
-    setTimeout(() => setProfileAlert(null), 3000);
+  const getToken = () => {
+    const storedUser = localStorage.getItem("redflagUser");
+    return storedUser ? JSON.parse(storedUser).token : null;
   };
 
-  const handlePasswordUpdate = (e: React.FormEvent) => {
+  const handleProfileSave = async (e: React.FormEvent) => {
     e.preventDefault();
+    setProfileLoading(true);
+    setProfileAlert(null);
+    try {
+      const baseURL = import.meta.env.VITE_API_BASE_URL || "http://localhost:8000";
+      await axios.put(
+        `${baseURL}/profile/`,
+        { display_name: displayName, email },
+        { headers: { Authorization: `Bearer ${getToken()}` } }
+      );
+      setProfileMessage("Changes saved successfully!");
+      setProfileAlert("success");
+    } catch (err: any) {
+      const detail = err?.response?.data?.detail;
+      setProfileMessage(typeof detail === "string" ? detail : "Failed to save changes. Please try again.");
+      setProfileAlert("error");
+    } finally {
+      setProfileLoading(false);
+      setTimeout(() => setProfileAlert(null), 3000);
+    }
+  };
+
+  const handlePasswordUpdate = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setPasswordAlert(null);
 
     if (newPassword !== confirmPassword) {
+      setPasswordMessage("Passwords do not match.");
       setPasswordAlert("error");
       setTimeout(() => setPasswordAlert(null), 3000);
       return;
     }
 
-    // TODO: Connect to Profile Update API (Sprint 4 - F7)
-    setPasswordAlert("success");
-    setCurrentPassword("");
-    setNewPassword("");
-    setConfirmPassword("");
-    setTimeout(() => setPasswordAlert(null), 3000);
+    if (newPassword.length < 8) {
+      setPasswordMessage("Password must be at least 8 characters long.");
+      setPasswordAlert("error");
+      setTimeout(() => setPasswordAlert(null), 3000);
+      return;
+    }
+
+    setPasswordLoading(true);
+    try {
+      const baseURL = import.meta.env.VITE_API_BASE_URL || "http://localhost:8000";
+      await axios.put(
+        `${baseURL}/profile/`,
+        {
+          current_password: currentPassword,
+          new_password: newPassword,
+          confirm_password: confirmPassword,
+        },
+        { headers: { Authorization: `Bearer ${getToken()}` } }
+      );
+      setPasswordMessage("Password updated successfully!");
+      setPasswordAlert("success");
+      setCurrentPassword("");
+      setNewPassword("");
+      setConfirmPassword("");
+    } catch (err: any) {
+      const detail = err?.response?.data?.detail;
+      setPasswordMessage(typeof detail === "string" ? detail : "Failed to update password. Please try again.");
+      setPasswordAlert("error");
+    } finally {
+      setPasswordLoading(false);
+      setTimeout(() => setPasswordAlert(null), 3000);
+    }
   };
 
   return (
@@ -76,7 +125,14 @@ export function SettingsPage() {
           {profileAlert === "success" && (
             <div className="mb-6 p-4 bg-green-600/20 border border-green-600/50 rounded-lg flex items-center gap-3">
               <CheckCircle className="w-5 h-5 text-green-500 flex-shrink-0" />
-              <span className="text-green-500">Changes saved successfully!</span>
+              <span className="text-green-500">{profileMessage}</span>
+            </div>
+          )}
+
+          {profileAlert === "error" && (
+            <div className="mb-6 p-4 bg-red-600/20 border border-red-600/50 rounded-lg flex items-center gap-3">
+              <AlertCircle className="w-5 h-5 text-red-500 flex-shrink-0" />
+              <span className="text-red-500">{profileMessage}</span>
             </div>
           )}
 
@@ -109,9 +165,10 @@ export function SettingsPage() {
 
             <button
               type="submit"
-              className="px-6 py-3 bg-red-600 hover:bg-red-700 rounded-lg font-semibold transition-colors"
+              disabled={profileLoading}
+              className="px-6 py-3 bg-red-600 hover:bg-red-700 disabled:bg-gray-600 disabled:cursor-not-allowed rounded-lg font-semibold transition-colors"
             >
-              Save Changes
+              {profileLoading ? "Saving..." : "Save Changes"}
             </button>
           </form>
         </div>
@@ -128,14 +185,14 @@ export function SettingsPage() {
           {passwordAlert === "success" && (
             <div className="mb-6 p-4 bg-green-600/20 border border-green-600/50 rounded-lg flex items-center gap-3">
               <CheckCircle className="w-5 h-5 text-green-500 flex-shrink-0" />
-              <span className="text-green-500">Password updated successfully!</span>
+              <span className="text-green-500">{passwordMessage}</span>
             </div>
           )}
 
           {passwordAlert === "error" && (
             <div className="mb-6 p-4 bg-red-600/20 border border-red-600/50 rounded-lg flex items-center gap-3">
               <AlertCircle className="w-5 h-5 text-red-500 flex-shrink-0" />
-              <span className="text-red-500">Passwords do not match. Please try again.</span>
+              <span className="text-red-500">{passwordMessage}</span>
             </div>
           )}
 
@@ -184,9 +241,10 @@ export function SettingsPage() {
 
             <button
               type="submit"
-              className="px-6 py-3 bg-red-600 hover:bg-red-700 rounded-lg font-semibold transition-colors"
+              disabled={passwordLoading}
+              className="px-6 py-3 bg-red-600 hover:bg-red-700 disabled:bg-gray-600 disabled:cursor-not-allowed rounded-lg font-semibold transition-colors"
             >
-              Update Password
+              {passwordLoading ? "Updating..." : "Update Password"}
             </button>
           </form>
         </div>
@@ -200,9 +258,7 @@ export function SettingsPage() {
           <p className="text-gray-400 mb-6">
             Once you delete your account, there is no going back. All your scan history and data will be permanently removed.
           </p>
-          <button
-            className="px-6 py-3 border-2 border-red-600 text-red-500 hover:bg-red-600/10 rounded-lg font-semibold transition-colors"
-          >
+          <button className="px-6 py-3 border-2 border-red-600 text-red-500 hover:bg-red-600/10 rounded-lg font-semibold transition-colors">
             Delete Account
           </button>
         </div>
