@@ -2,6 +2,7 @@ import { useState, useEffect, ReactNode } from "react";
 import { Navbar } from "./Navbar";
 import { Search, MessageSquare, DollarSign, Clock, Mail, AlertTriangle, CheckCircle, Eye, Shield, UserCheck, FileText, Loader2 } from "lucide-react";
 import axios from "axios";
+import "../../styles/guidepage.css";
 
 type Tab = "red-flags" | "tips";
 
@@ -79,17 +80,19 @@ export function RedFlagGuidePage() {
   );
 
   return (
-    <div className="min-h-screen bg-[#0D1117] text-white">
+    <div className="redflag-guide-page">
       <Navbar />
 
-      <div className="max-w-7xl mx-auto px-6 py-12">
-        <h1 className="text-4xl font-bold mb-2">Red Flag Guide</h1>
-        <p className="text-gray-400 mb-8">
-          Learn to identify job scams and protect yourself while searching for opportunities online.
-        </p>
+      <div className="redflag-guide-container">
+        <div className="redflag-guide-hero">
+          <h1 className="redflag-guide-title">Red Flag Guide</h1>
+          <p className="redflag-guide-description">
+            Learn to identify job scams and protect yourself while searching for opportunities online.
+          </p>
+        </div>
 
         {/* Search */}
-        <div className="mb-8">
+        <div className="redflag-guide-search">
           <div className="relative">
             <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
             <input
@@ -97,30 +100,22 @@ export function RedFlagGuidePage() {
               placeholder={activeTab === "red-flags" ? "Search red flags..." : "Search safety tips..."}
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full pl-12 pr-4 py-3 bg-white/5 border border-white/10 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-600 focus:border-transparent transition-all placeholder:text-gray-500"
+              className="redflag-guide-search-input"
             />
           </div>
         </div>
 
         {/* Tabs */}
-        <div className="flex gap-2 mb-8 border-b border-white/10">
+        <div className="redflag-guide-tabs">
           <button
             onClick={() => setActiveTab("red-flags")}
-            className={`px-6 py-3 font-semibold transition-colors border-b-2 ${
-              activeTab === "red-flags"
-                ? "border-red-600 text-red-500"
-                : "border-transparent text-gray-400 hover:text-white"
-            }`}
+            className={`redflag-guide-tab ${activeTab === "red-flags" ? "active-red-flags" : ""}`}
           >
             Common Red Flags {!loading && `(${redFlags.length})`}
           </button>
           <button
             onClick={() => setActiveTab("tips")}
-            className={`px-6 py-3 font-semibold transition-colors border-b-2 ${
-              activeTab === "tips"
-                ? "border-green-600 text-green-500"
-                : "border-transparent text-gray-400 hover:text-white"
-            }`}
+            className={`redflag-guide-tab ${activeTab === "tips" ? "active-tips" : ""}`}
           >
             Safe Job-Hunting Tips {!loading && `(${tips.length})`}
           </button>
@@ -128,7 +123,7 @@ export function RedFlagGuidePage() {
 
         {/* Loading */}
         {loading && (
-          <div className="flex items-center justify-center py-16 gap-3 text-gray-400">
+          <div className="redflag-guide-loading">
             <Loader2 className="w-5 h-5 animate-spin" />
             <span className="text-sm">Loading guide content...</span>
           </div>
@@ -136,49 +131,49 @@ export function RedFlagGuidePage() {
 
         {/* Error */}
         {!loading && error && (
-          <div className="text-center py-12 text-red-400 text-sm">{error}</div>
+          <div className="redflag-guide-error">{error}</div>
         )}
 
         {/* Red Flags */}
         {!loading && !error && activeTab === "red-flags" && (
           <>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div className="redflag-guide-grid">
               {filteredRedFlags.map((flag) => (
                 <div
                   key={flag.id}
-                  className="bg-white/5 border border-red-600/20 rounded-lg p-6 hover:border-red-600/50 transition-colors flex flex-col justify-between"
+                  className="redflag-guide-card redflag-guide-card-red"
                 >
                   <div>
-                    <div className="flex items-start gap-3 mb-3">
-                      <div className="w-10 h-10 bg-red-600/20 rounded-lg flex items-center justify-center flex-shrink-0 text-red-500">
+                    <div className="redflag-guide-card-header">
+                      <div className="redflag-guide-icon redflag-guide-icon-red">
                         {getIcon(flag.category)}
                       </div>
                       <div className="flex-1">
-                        <div className="text-xs uppercase text-red-500 font-semibold mb-1">
+                        <div className="redflag-guide-category">
                           {flag.category}
                         </div>
-                        <h3 className="text-lg font-semibold text-white mb-2">
+                        <h3 className="redflag-guide-card-title">
                           "{flag.phrase}"
                         </h3>
                       </div>
                     </div>
-                    <p className="text-gray-300 mb-4 text-sm leading-relaxed">
+                    <p className="redflag-guide-card-text">
                       {flag.explanation}
                     </p>
                   </div>
 
-                  <div className="bg-green-600/10 border border-green-600/20 rounded-lg p-3 mt-auto">
-                    <div className="text-xs uppercase text-green-500 font-semibold mb-1">
+                  <div className="redflag-guide-tip-box">
+                    <div className="redflag-guide-tip-box-title">
                       What to Do
                     </div>
-                    <p className="text-sm text-gray-300">{flag.what_to_do}</p>
+                    <p className="redflag-guide-tip-box-text">{flag.what_to_do}</p>
                   </div>
                 </div>
               ))}
             </div>
 
             {filteredRedFlags.length === 0 && (
-              <div className="text-center py-12 text-gray-400">
+              <div className="redflag-guide-empty">
                 No red flags found matching "{searchQuery}"
               </div>
             )}
@@ -188,7 +183,7 @@ export function RedFlagGuidePage() {
         {/* Tips */}
         {!loading && !error && activeTab === "tips" && (
           <>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div className="redflag-guide-grid">
               {filteredTips.map((tip, index) => {
                 const tipIcons = [
                   <UserCheck className="w-6 h-6" />,
@@ -203,15 +198,15 @@ export function RedFlagGuidePage() {
                 return (
                   <div
                     key={tip.id}
-                    className="bg-white/5 border border-green-600/20 hover:border-green-600/50 rounded-lg p-6 transition-colors"
+                    className="redflag-guide-card redflag-guide-card-green redflag-guide-tip-card"
                   >
                     <div className="flex items-start gap-4">
-                      <div className="w-12 h-12 bg-green-600/20 rounded-lg flex items-center justify-center flex-shrink-0 text-green-500">
+                      <div className="redflag-guide-tip-icon">
                         {tipIcons[index % tipIcons.length]}
                       </div>
                       <div className="flex-1">
-                        <h3 className="text-xl font-semibold mb-2 text-white">{tip.title}</h3>
-                        <p className="text-gray-300 text-sm leading-relaxed">{tip.description}</p>
+                        <h3 className="redflag-guide-tip-title">{tip.title}</h3>
+                        <p className="redflag-guide-card-text">{tip.description}</p>
                       </div>
                     </div>
                   </div>
@@ -220,7 +215,7 @@ export function RedFlagGuidePage() {
             </div>
 
             {filteredTips.length === 0 && (
-              <div className="text-center py-12 text-gray-400">
+              <div className="redflag-guide-empty">
                 No tips found matching "{searchQuery}"
               </div>
             )}

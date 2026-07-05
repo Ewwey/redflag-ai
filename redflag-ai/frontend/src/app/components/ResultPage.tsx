@@ -3,6 +3,7 @@ import { Link, useLocation, Navigate, useNavigate } from "react-router-dom";
 import { Navbar } from "./Navbar";
 import { AlertTriangle, ChevronDown, ChevronUp, CheckCircle, Flag, ArrowLeft, RotateCcw } from "lucide-react";
 import axios from "axios";
+import "../../styles/resultspage.css";
 
 interface RedFlagHit {
   phrase: string;
@@ -75,33 +76,33 @@ export function ResultPage() {
   }[riskLevel] || "Analysis complete.";
 
   return (
-    <div className="min-h-screen bg-[#0D1117] text-white">
+    <div className="result-page">
       <Navbar isLoggedIn userName={userName} />
 
-      <div className="max-w-5xl mx-auto px-6 py-12">
+      <div className="result-page__container">
 
         {/* Back button */}
         <button
           onClick={() => navigate("/dashboard")}
-          className="flex items-center gap-2 text-gray-400 hover:text-white mb-8 transition-colors"
+          className="result-page__back-btn"
         >
           <ArrowLeft className="w-4 h-4" />
           Back to Dashboard
         </button>
 
         {/* Risk Gauge */}
-        <div className="flex flex-col items-center mb-12">
+        <div className="result-page__gauge-section">
           <RiskGauge score={score} />
 
-          <div className="mt-6 text-center">
-            <div className="text-5xl font-bold mb-3">{score} / 100</div>
+          <div className="result-page__gauge-score">
+            <div className="result-page__score-value">{score} / 100</div>
             <div
-              className={`inline-block px-6 py-2 rounded-full font-bold text-lg ${
+              className={`result-page__risk-badge ${
                 riskColor === "red"
-                  ? "bg-red-600/20 text-red-500 border-2 border-red-600"
+                  ? "result-page__risk-badge--red"
                   : riskColor === "yellow"
-                  ? "bg-yellow-600/20 text-yellow-500 border-2 border-yellow-600"
-                  : "bg-green-600/20 text-green-500 border-2 border-green-600"
+                  ? "result-page__risk-badge--yellow"
+                  : "result-page__risk-badge--green"
               }`}
             >
               {riskLevel}
@@ -109,15 +110,15 @@ export function ResultPage() {
           </div>
 
           {/* Legend */}
-          <div className="flex justify-center gap-6 mt-6">
+          <div className="result-page__legend">
             {[
               { color: "bg-green-500", label: "Safe (0–39)" },
               { color: "bg-yellow-500", label: "Suspicious (40–69)" },
               { color: "bg-red-500", label: "Danger (70–100)" },
             ].map(({ color, label }) => (
-              <div key={label} className="flex items-center gap-2">
-                <div className={`w-3 h-3 rounded-full ${color}`} />
-                <span className="text-sm text-gray-300">{label}</span>
+              <div key={label} className="result-page__legend-item">
+                <div className={`result-page__legend-dot result-page__legend-dot--${color}`} />
+                <span className="result-page__legend-label">{label}</span>
               </div>
             ))}
           </div>
@@ -125,23 +126,23 @@ export function ResultPage() {
 
         {/* Risk Summary Banner */}
         <div
-          className={`mb-8 rounded-xl border p-6 ${
+          className={`result-page__summary ${
             riskColor === "red"
-              ? "border-red-600/30 bg-red-600/10"
+              ? "result-page__summary--red"
               : riskColor === "yellow"
-              ? "border-yellow-600/30 bg-yellow-600/10"
-              : "border-green-600/30 bg-green-600/10"
+              ? "result-page__summary--yellow"
+              : "result-page__summary--green"
           }`}
         >
-          <h2 className="text-xl font-bold mb-2">Risk Summary</h2>
-          <p className="text-gray-300">{riskSummaryText}</p>
+          <h2 className="result-page__summary-title">Risk Summary</h2>
+          <p className="result-page__summary-text">{riskSummaryText}</p>
         </div>
 
         {/* Feedback buttons */}
-        <div className="mb-8 bg-white/5 border border-white/10 rounded-xl p-6">
-          <h2 className="text-lg font-semibold mb-4 text-gray-300">Was this result accurate?</h2>
+        <div className="result-page__feedback">
+          <h2 className="result-page__feedback-title">Was this result accurate?</h2>
           {feedbackStatus ? (
-            <div className="flex items-center gap-2 text-green-400">
+            <div className="result-page__feedback-confirmed">
               <CheckCircle className="w-5 h-5" />
               <span>
                 {feedbackStatus === "Resolved"
@@ -152,11 +153,11 @@ export function ResultPage() {
               </span>
             </div>
           ) : (
-            <div className="flex flex-col sm:flex-row gap-3">
+            <div className="result-page__feedback-buttons">
               <button
                 onClick={() => handleFeedback("Resolved")}
                 disabled={feedbackLoading}
-                className="flex items-center justify-center gap-2 px-5 py-2.5 bg-green-600/20 border border-green-600/40 hover:bg-green-600/30 text-green-400 rounded-lg font-medium transition-colors disabled:opacity-50"
+                className="result-page__feedback-btn result-page__feedback-btn--resolved"
               >
                 <CheckCircle className="w-4 h-4" />
                 Mark as Resolved
@@ -164,7 +165,7 @@ export function ResultPage() {
               <button
                 onClick={() => handleFeedback("False_Positive")}
                 disabled={feedbackLoading}
-                className="flex items-center justify-center gap-2 px-5 py-2.5 bg-yellow-600/20 border border-yellow-600/40 hover:bg-yellow-600/30 text-yellow-400 rounded-lg font-medium transition-colors disabled:opacity-50"
+                className="result-page__feedback-btn result-page__feedback-btn--false-positive"
               >
                 <Flag className="w-4 h-4" />
                 Report: Not a Scam
@@ -172,7 +173,7 @@ export function ResultPage() {
               <button
                 onClick={() => handleFeedback("False_Negative")}
                 disabled={feedbackLoading}
-                className="flex items-center justify-center gap-2 px-5 py-2.5 bg-red-600/20 border border-red-600/40 hover:bg-red-600/30 text-red-400 rounded-lg font-medium transition-colors disabled:opacity-50"
+                className="result-page__feedback-btn result-page__feedback-btn--false-negative"
               >
                 <Flag className="w-4 h-4" />
                 Report: Missed Scam
@@ -182,38 +183,38 @@ export function ResultPage() {
         </div>
 
         {/* Red Flags */}
-        <div className="mb-8">
-          <h2 className="text-3xl font-bold mb-6">
+        <div className="result-page__flags-section">
+          <h2 className="result-page__flags-heading">
             {redFlags.length === 0 ? "No Red Flags Detected ✓" : `Red Flags Detected (${redFlags.length})`}
           </h2>
 
           {redFlags.length === 0 ? (
-            <div className="bg-green-600/10 border border-green-600/30 rounded-lg p-6 text-green-400">
+            <div className="result-page__flags-empty">
               This job post passed all our NLP checks. No suspicious phrases or patterns were found.
             </div>
           ) : (
-            <div className="space-y-4">
+            <div className="result-page__flags-list">
               {redFlags.map((flag, index) => (
                 <div
                   key={index}
-                  className="bg-white/5 border border-red-600/30 rounded-lg p-6"
+                  className="result-page__flag-card"
                 >
                   <div className="flex gap-4">
-                    <div className="w-10 h-10 rounded-full bg-red-600/20 flex items-center justify-center shrink-0">
+                    <div className="result-page__flag-icon">
                       <AlertTriangle className="w-5 h-5 text-red-500" />
                     </div>
                     <div className="flex-1">
-                      <span className="text-xs uppercase tracking-wider text-gray-400 font-semibold block mb-1">
+                      <span className="result-page__flag-category">
                         {flag.category || "NLP Indicator"}
                       </span>
-                      <h3 className="font-semibold text-lg mb-2 text-red-400">
+                      <h3 className="result-page__flag-phrase">
                         "{flag.phrase}"
                       </h3>
-                      <p className="text-gray-300 text-sm leading-relaxed">{flag.explanation}</p>
+                      <p className="result-page__flag-explanation">{flag.explanation}</p>
                       {flag.highlighted_text && (
-                        <div className="mt-3 text-xs text-gray-400">
+                        <div className="result-page__flag-match">
                           Matched in text:{" "}
-                          <span className="bg-red-600/20 text-red-400 px-1.5 py-0.5 rounded font-mono border border-red-600/30">
+                          <span className="result-page__flag-snippet">
                             {flag.highlighted_text}
                           </span>
                         </div>
@@ -230,7 +231,7 @@ export function ResultPage() {
         {redFlags.length > 0 && (
           <button
             onClick={() => setShowDetailedReport(!showDetailedReport)}
-            className="w-full mb-6 px-6 py-3 bg-white/5 border border-white/10 hover:bg-white/10 rounded-lg font-semibold flex items-center justify-center gap-2 transition-colors"
+            className="result-page__toggle-btn"
           >
             {showDetailedReport ? "Hide" : "View"} Full Detailed Report
             {showDetailedReport ? <ChevronUp className="w-5 h-5" /> : <ChevronDown className="w-5 h-5" />}
@@ -239,19 +240,19 @@ export function ResultPage() {
 
         {/* Detailed breakdown */}
         {showDetailedReport && redFlags.length > 0 && (
-          <div className="bg-white/5 border border-white/10 rounded-lg p-6 mb-8">
-            <h3 className="text-2xl font-bold mb-6">Detailed Breakdown</h3>
+          <div className="result-page__breakdown">
+            <h3 className="result-page__breakdown-title">Detailed Breakdown</h3>
             <div className="space-y-6">
               {redFlags.map((item, index) => (
-                <div key={index} className="border-l-4 border-red-600 pl-4">
-                  <div className="text-sm text-red-500 font-semibold mb-1 uppercase">
+                <div key={index} className="result-page__breakdown-item">
+                  <div className="result-page__breakdown-category">
                     {item.category || "Flag Match"}
                   </div>
-                  <div className="font-medium text-white mb-2">"{item.phrase}"</div>
-                  <p className="text-gray-400 text-sm mb-3">{item.explanation}</p>
-                  <div className="bg-white/5 rounded p-3 text-gray-300 text-sm">
+                  <div className="result-page__breakdown-phrase">"{item.phrase}"</div>
+                  <p className="result-page__breakdown-explanation">{item.explanation}</p>
+                  <div className="result-page__breakdown-snippet-box">
                     Matched Snippet:{" "}
-                    <span className="bg-red-600/20 text-red-400 px-1.5 py-0.5 rounded font-mono border border-red-600/30">
+                    <span className="result-page__breakdown-snippet-box">
                       {item.highlighted_text || item.phrase}
                     </span>
                   </div>
@@ -262,17 +263,17 @@ export function ResultPage() {
         )}
 
         {/* Action buttons */}
-        <div className="flex flex-col sm:flex-row gap-4">
+        <div className="result-page__actions">
           <button
             onClick={() => navigate("/dashboard")}
-            className="flex-1 px-6 py-3 bg-white/5 border border-white/10 hover:bg-white/10 rounded-lg font-semibold flex items-center justify-center gap-2 transition-colors"
+            className="result-page__action-btn result-page__action-btn--back"
           >
             <ArrowLeft className="w-5 h-5" />
             Back to Dashboard
           </button>
           <Link
             to="/scan"
-            className="flex-1 px-6 py-3 bg-red-600 hover:bg-red-700 rounded-lg font-semibold text-center flex items-center justify-center gap-2 transition-colors"
+            className="result-page__action-btn result-page__action-btn--primary"
           >
             <RotateCcw className="w-5 h-5" />
             Scan Another Post

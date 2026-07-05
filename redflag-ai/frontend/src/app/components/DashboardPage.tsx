@@ -3,6 +3,7 @@ import { Link, useNavigate } from "react-router-dom";
 import { Navbar } from "./Navbar";
 import { useAuth } from "../../hooks/useAuth";
 import axios from "axios";
+import "../../styles/dashboardpage.css";
 import {
   BarChart3,
   ShieldAlert,
@@ -282,18 +283,18 @@ export function DashboardPage() {
   const safeResults = scans.filter((s) => s.risk_level === "Safe").length;
 
   return (
-    <div className="min-h-screen bg-[#0D1117] text-white">
+    <div className="dashboard-page">
       <Navbar />
 
-      <div className="max-w-7xl mx-auto px-6 py-12">
+      <div className="dashboard-container">
         {/* Header */}
-        <div className="flex items-center justify-between mb-8">
-          <h1 className="text-4xl font-bold">My Scan History</h1>
-          <div className="flex gap-3">
-            <Link to="/scan" className="px-6 py-3 bg-red-600 hover:bg-red-700 rounded-lg font-semibold transition-colors">
+        <div className="dashboard-header">
+          <h1 className="dashboard-title">My Scan History</h1>
+          <div className="dashboard-actions">
+            <Link to="/scan" className="dashboard-primary-btn">
               New Scan
             </Link>
-            <button onClick={handleLogout} className="px-6 py-3 bg-white/5 border border-white/10 hover:bg-white/10 rounded-lg font-semibold transition-colors">
+            <button onClick={handleLogout} className="dashboard-secondary-btn">
               Logout
             </button>
           </div>
@@ -301,14 +302,14 @@ export function DashboardPage() {
 
         {/* Mock data notice */}
         {usingMock && (
-          <div className="mb-6 p-3 bg-yellow-600/10 border border-yellow-600/30 rounded-lg text-yellow-500 text-sm">
+          <div className="dashboard-notice">
             {fetchError || "No scan history found. Showing sample data — run a real scan to populate your history!"}
           </div>
         )}
 
         {/* Stats */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-          <div className="bg-white/5 border border-white/10 rounded-lg p-6">
+        <div className="dashboard-stats-grid">
+          <div className="dashboard-status-card">
             <div className="flex items-center gap-3 mb-2">
               <div className="w-10 h-10 bg-blue-600/20 rounded-lg flex items-center justify-center">
                 <BarChart3 className="w-5 h-5 text-blue-500" />
@@ -318,7 +319,7 @@ export function DashboardPage() {
             <div className="text-3xl font-bold">{totalScans}</div>
           </div>
 
-          <div className="bg-white/5 border border-white/10 rounded-lg p-6">
+          <div className="dashboard-status-card">
             <div className="flex items-center gap-3 mb-2">
               <div className="w-10 h-10 bg-red-600/20 rounded-lg flex items-center justify-center">
                 <ShieldAlert className="w-5 h-5 text-red-500" />
@@ -328,7 +329,7 @@ export function DashboardPage() {
             <div className="text-3xl font-bold text-red-500">{dangerResults}</div>
           </div>
 
-          <div className="bg-white/5 border border-white/10 rounded-lg p-6">
+          <div className="dashboard-status-card">
             <div className="flex items-center gap-3 mb-2">
               <div className="w-10 h-10 bg-green-600/20 rounded-lg flex items-center justify-center">
                 <ShieldCheck className="w-5 h-5 text-green-500" />
@@ -340,27 +341,25 @@ export function DashboardPage() {
         </div>
 
         {/* Filter + Sort */}
-        <div className="flex flex-col sm:flex-row gap-4 justify-between items-center bg-white/5 border border-white/10 rounded-lg p-4 mb-6">
-          <div className="flex flex-wrap items-center gap-2 w-full sm:w-auto">
-            <Filter className="w-4 h-4 text-gray-400 mr-2" />
+        <div className="dashboard-filter-bar">
+          <div className="dashboard-filter-group">
+            <Filter className="dashboard-filter-icon" />
             {(["All", "Safe", "Suspicious", "Danger"] as RiskLevel[]).map((level) => (
               <button
                 key={level}
                 onClick={() => setFilterLevel(level)}
-                className={`px-4 py-1.5 rounded-md text-sm font-medium transition-colors ${
-                  filterLevel === level ? "bg-red-600 text-white" : "text-gray-400 hover:text-white hover:bg-white/5"
-                }`}
+                className={`dashboard-filter-pill ${filterLevel === level ? "active" : ""}`}
               >
                 {level}
               </button>
             ))}
           </div>
-          <div className="flex items-center gap-2 w-full sm:w-auto justify-end">
-            <ArrowUpDown className="w-4 h-4 text-gray-400" />
+          <div className="dashboard-sort-group">
+            <ArrowUpDown className="dashboard-filter-icon" />
             <select
               value={sortOrder}
               onChange={(e) => setSortOrder(e.target.value as SortOrder)}
-              className="bg-[#0D1117] border border-white/10 rounded-md px-3 py-1.5 text-sm font-medium focus:outline-none focus:ring-1 focus:ring-red-600 text-gray-300"
+              className="dashboard-sort-select"
             >
               <option value="Newest">Newest First</option>
               <option value="Oldest">Oldest First</option>
@@ -369,32 +368,32 @@ export function DashboardPage() {
         </div>
 
         {/* Table */}
-        <div className="bg-white/5 border border-white/10 rounded-lg overflow-hidden">
+        <div className="dashboard-table-card">
           {loading && (
-            <div className="flex items-center justify-center py-16 gap-3 text-gray-400">
+            <div className="dashboard-loading-state">
               <Loader2 className="w-5 h-5 animate-spin" />
               <span className="text-sm">Loading scan history...</span>
             </div>
           )}
 
           {!loading && displayedScans.length === 0 && (
-            <div className="text-center py-12 text-gray-500 text-sm">
+            <div className="dashboard-empty-state">
               No scans match your current filter.
             </div>
           )}
 
           {!loading && displayedScans.length > 0 && (
-            <div className="overflow-x-auto">
-              <table className="w-full text-left border-collapse">
+            <div className="dashboard-table-wrapper">
+              <table className="dashboard-table">
                 <thead>
-                  <tr className="border-b border-white/10 bg-white/5 text-gray-400 text-sm font-medium">
-                    <th className="p-4">Date Added</th>
-                    <th className="p-4">Job Description Preview</th>
-                    <th className="p-4">Threat Assessment</th>
-                    <th className="p-4 text-center">Actions</th>
+                  <tr>
+                    <th>Date Added</th>
+                    <th>Job Description Preview</th>
+                    <th>Threat Assessment</th>
+                    <th className="dashboard-table-actions">Actions</th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-white/5">
+                <tbody>
                   {displayedScans.map((scan) => {
                     const badgeColors = {
                       Safe: "bg-green-600/20 text-green-500 border-green-600/30",
@@ -403,38 +402,36 @@ export function DashboardPage() {
                     }[scan.risk_level] || "bg-gray-600/20 text-gray-400 border-gray-600/30";
 
                     return (
-                      <tr key={getScanId(scan)} className="hover:bg-white/[0.02] transition-colors">
-                        <td className="p-4 whitespace-nowrap text-sm text-gray-300">
+                      <tr key={getScanId(scan)}>
+                        <td className="dashboard-table-date">
                           <div>{formatScanDate(scan)}</div>
-                          <div className="text-xs text-gray-500">{formatScanTime(scan)}</div>
+                          <div className="dashboard-table-time">{formatScanTime(scan)}</div>
                         </td>
-                        <td className="p-4 max-w-md">
-                          <p className="text-sm text-gray-300 truncate italic">
-                            "{scan.text_preview || scan.job_description}"
-                          </p>
+                        <td className="dashboard-table-preview">
+                          <p>"{scan.text_preview || scan.job_description}"</p>
                         </td>
-                        <td className="p-4 whitespace-nowrap">
-                          <div className="flex items-center gap-3">
-                            <span className={`px-2.5 py-0.5 rounded-full text-xs font-bold border ${badgeColors}`}>
+                        <td className="dashboard-table-risk">
+                          <div className="dashboard-risk-row">
+                            <span className={`dashboard-risk-badge ${badgeColors}`}>
                               {scan.risk_level.toUpperCase()}
                             </span>
-                            <span className="text-sm font-semibold text-gray-400">
+                            <span className="dashboard-score-text">
                               {scan.scam_score}/100
                             </span>
                           </div>
                         </td>
-                        <td className="p-4 whitespace-nowrap text-center">
-                          <div className="flex items-center justify-center gap-2">
+                        <td className="dashboard-table-actions">
+                          <div className="dashboard-action-buttons">
                             <button
                               onClick={() => handleViewDetails(scan)}
-                              className="p-2 bg-white/5 hover:bg-red-600/20 border border-white/10 hover:border-red-600/40 rounded text-gray-400 hover:text-red-400 transition-all"
+                              className="dashboard-action-btn"
                               title="View Scan Details"
                             >
                               <Eye className="w-4 h-4" />
                             </button>
                             <button
                               onClick={() => setScanToDelete(getScanId(scan))}
-                              className="p-2 bg-white/5 hover:bg-red-600/20 border border-white/10 hover:border-red-600/40 rounded text-gray-400 hover:text-red-400 transition-all"
+                              className="dashboard-action-btn"
                               title="Delete Scan"
                             >
                               <Trash2 className="w-4 h-4" />
@@ -454,7 +451,7 @@ export function DashboardPage() {
       {/* Delete Confirmation Modal */}
       {scanToDelete !== null && (
         <div className="fixed inset-0 bg-black/70 backdrop-blur-sm z-50 flex items-center justify-center">
-          <div className="bg-[#161B22] border border-white/10 rounded-lg p-8 max-w-md w-full mx-4">
+          <div className="dashboard-modal-card">
             <h3 className="text-xl font-bold mb-2">Remove Scan?</h3>
             <p className="text-gray-400 mb-6">
               Are you sure you want to remove this scan? This action cannot be undone.

@@ -2,6 +2,7 @@ import { useState, useContext, useEffect } from "react";
 import { AuthContext } from "../../context/AuthContext";
 import { Navbar } from "./Navbar";
 import { CheckCircle, AlertCircle, User, Lock, AlertTriangle } from "lucide-react";
+import "../../styles/settingspage.css";
 import axios from "axios";
 
 type AlertType = "success" | "error" | null;
@@ -103,42 +104,42 @@ export function SettingsPage() {
   };
 
   return (
-    <div className="min-h-screen bg-[#0D1117] text-white">
+    <div className="settings-page">
       <Navbar
         isLoggedIn={!!user}
         userName={user?.display_name || user?.name || user?.email || "User"}
       />
 
-      <div className="max-w-4xl mx-auto px-6 py-12">
-        <h1 className="text-4xl font-bold mb-2">Profile & Security Settings</h1>
-        <p className="text-gray-400 mb-8">Manage your account information and security preferences.</p>
+      <div className="settings-page__container">
+        <h1 className="settings-page__title">Profile & Security Settings</h1>
+        <p className="settings-page__subtitle">Manage your account information and security preferences.</p>
 
         {/* Profile Information Section */}
-        <div className="bg-white/5 border border-white/10 rounded-lg p-8 mb-6">
-          <div className="flex items-center gap-3 mb-6">
-            <div className="w-10 h-10 bg-blue-600/20 rounded-lg flex items-center justify-center">
-              <User className="w-5 h-5 text-blue-500" />
+        <div className="settings-page__section">
+          <div className="settings-page__section-header">
+            <div className="settings-page__section-icon settings-page__section-icon--blue">
+              <User className="w-5 h-5" />
             </div>
-            <h2 className="text-2xl font-bold">Profile Information</h2>
+            <h2 className="settings-page__section-title">Profile Information</h2>
           </div>
 
           {profileAlert === "success" && (
-            <div className="mb-6 p-4 bg-green-600/20 border border-green-600/50 rounded-lg flex items-center gap-3">
+            <div className="settings-page__alert--success">
               <CheckCircle className="w-5 h-5 text-green-500 flex-shrink-0" />
               <span className="text-green-500">{profileMessage}</span>
             </div>
           )}
 
           {profileAlert === "error" && (
-            <div className="mb-6 p-4 bg-red-600/20 border border-red-600/50 rounded-lg flex items-center gap-3">
+            <div className="settings-page__alert--error">
               <AlertCircle className="w-5 h-5 text-red-500 flex-shrink-0" />
               <span className="text-red-500">{profileMessage}</span>
             </div>
           )}
 
-          <form onSubmit={handleProfileSave} className="space-y-5">
-            <div>
-              <label htmlFor="displayName" className="block text-sm mb-2 text-gray-300">
+          <form onSubmit={handleProfileSave} className="settings-page__form">
+            <div className="settings-page__field">
+              <label htmlFor="displayName" className="settings-page__label">
                 Display Name
               </label>
               <input
@@ -146,12 +147,12 @@ export function SettingsPage() {
                 type="text"
                 value={displayName}
                 onChange={(e) => setDisplayName(e.target.value)}
-                className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-600 focus:border-transparent transition-all"
+                className="settings-page__input"
               />
             </div>
 
-            <div>
-              <label htmlFor="email" className="block text-sm mb-2 text-gray-300">
+            <div className="settings-page__field">
+              <label htmlFor="email" className="settings-page__label">
                 Email Address
               </label>
               <input
@@ -159,14 +160,14 @@ export function SettingsPage() {
                 type="email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-600 focus:border-transparent transition-all"
+                className="settings-page__input"
               />
             </div>
 
             <button
               type="submit"
               disabled={profileLoading}
-              className="px-6 py-3 bg-red-600 hover:bg-red-700 disabled:bg-gray-600 disabled:cursor-not-allowed rounded-lg font-semibold transition-colors"
+              className="settings-page__submit-btn"
             >
               {profileLoading ? "Saving..." : "Save Changes"}
             </button>
@@ -174,31 +175,31 @@ export function SettingsPage() {
         </div>
 
         {/* Security / Change Password Section */}
-        <div className="bg-white/5 border border-white/10 rounded-lg p-8 mb-6">
-          <div className="flex items-center gap-3 mb-6">
-            <div className="w-10 h-10 bg-purple-600/20 rounded-lg flex items-center justify-center">
-              <Lock className="w-5 h-5 text-purple-500" />
+        <div className="settings-page__section">
+          <div className="settings-page__section-header">
+            <div className="settings-page__section-icon settings-page__section-icon--purple">
+              <Lock className="w-5 h-5" />
             </div>
-            <h2 className="text-2xl font-bold">Security</h2>
+            <h2 className="settings-page__section-title">Security</h2>
           </div>
 
           {passwordAlert === "success" && (
-            <div className="mb-6 p-4 bg-green-600/20 border border-green-600/50 rounded-lg flex items-center gap-3">
+            <div className="settings-page__alert settings-page__alert--success">
               <CheckCircle className="w-5 h-5 text-green-500 flex-shrink-0" />
               <span className="text-green-500">{passwordMessage}</span>
             </div>
           )}
 
           {passwordAlert === "error" && (
-            <div className="mb-6 p-4 bg-red-600/20 border border-red-600/50 rounded-lg flex items-center gap-3">
+            <div className="settings-page__alert settings-page__alert--error">
               <AlertCircle className="w-5 h-5 text-red-500 flex-shrink-0" />
               <span className="text-red-500">{passwordMessage}</span>
             </div>
           )}
 
-          <form onSubmit={handlePasswordUpdate} className="space-y-5">
-            <div>
-              <label htmlFor="currentPassword" className="block text-sm mb-2 text-gray-300">
+          <form onSubmit={handlePasswordUpdate} className="settings-page__form">
+            <div className="settings-page__field">
+              <label htmlFor="currentPassword" className="settings-page__label">
                 Current Password
               </label>
               <input
@@ -207,12 +208,12 @@ export function SettingsPage() {
                 value={currentPassword}
                 onChange={(e) => setCurrentPassword(e.target.value)}
                 placeholder="••••••••"
-                className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-600 focus:border-transparent transition-all placeholder:text-gray-500"
+                className="settings-page__input"
               />
             </div>
 
-            <div>
-              <label htmlFor="newPassword" className="block text-sm mb-2 text-gray-300">
+            <div className="settings-page__field">
+              <label htmlFor="newPassword" className="settings-page__label">
                 New Password
               </label>
               <input
@@ -221,12 +222,12 @@ export function SettingsPage() {
                 value={newPassword}
                 onChange={(e) => setNewPassword(e.target.value)}
                 placeholder="••••••••"
-                className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-600 focus:border-transparent transition-all placeholder:text-gray-500"
+                className="settings-page__input"
               />
             </div>
 
-            <div>
-              <label htmlFor="confirmPassword" className="block text-sm mb-2 text-gray-300">
+            <div className="settings-page__field">
+              <label htmlFor="confirmPassword" className="settings-page__label">
                 Confirm New Password
               </label>
               <input
@@ -235,14 +236,14 @@ export function SettingsPage() {
                 value={confirmPassword}
                 onChange={(e) => setConfirmPassword(e.target.value)}
                 placeholder="••••••••"
-                className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-600 focus:border-transparent transition-all placeholder:text-gray-500"
+                className="settings-page__input"
               />
             </div>
 
             <button
               type="submit"
               disabled={passwordLoading}
-              className="px-6 py-3 bg-red-600 hover:bg-red-700 disabled:bg-gray-600 disabled:cursor-not-allowed rounded-lg font-semibold transition-colors"
+              className="settings-page__submit-btn"
             >
               {passwordLoading ? "Updating..." : "Update Password"}
             </button>
@@ -250,15 +251,15 @@ export function SettingsPage() {
         </div>
 
         {/* Danger Zone */}
-        <div className="bg-red-600/5 border border-red-600/30 rounded-lg p-8">
-          <div className="flex items-center gap-3 mb-4">
+        <div className="settings-page__danger-zone">
+          <div className="settings-page__danger-header">
             <AlertTriangle className="w-6 h-6 text-red-500" />
-            <h2 className="text-2xl font-bold text-red-500">Danger Zone</h2>
+            <h2 className="settings-page__danger-title">Danger Zone</h2>
           </div>
-          <p className="text-gray-400 mb-6">
+          <p className="settings-page__danger-text">
             Once you delete your account, there is no going back. All your scan history and data will be permanently removed.
           </p>
-          <button className="px-6 py-3 border-2 border-red-600 text-red-500 hover:bg-red-600/10 rounded-lg font-semibold transition-colors">
+          <button className="settings-page__danger-btn">
             Delete Account
           </button>
         </div>
