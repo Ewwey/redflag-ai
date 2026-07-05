@@ -46,9 +46,9 @@ def compute_score(text: str) -> tuple[int, str]:
         if phrase not in unique_matches:
             unique_matches[phrase] = match
     
-    # Sum unique weights and scale them linearly into the 60-point module ceiling
+    # Sum unique weights and scale them linearly into the 100-point module ceiling
     total_weight = sum(m["weight"] for m in unique_matches.values())
-    keyword_score = min(total_weight * 10, 60)  # E.g., a total weight of 6 maps cleanly to 60/60
+    keyword_score = min(total_weight * 5, 100)
 
     # 3. Layer 2: Classifier Scoring (With Graceful Failure Fallback)
     classifier_score = 0
