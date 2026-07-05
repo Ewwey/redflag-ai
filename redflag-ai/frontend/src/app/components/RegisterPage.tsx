@@ -2,6 +2,7 @@ import { Link, useNavigate } from "react-router-dom";
 import { Shield } from "lucide-react";
 import { useState } from "react";
 import { register } from "../../services/authService";
+import "../../styles/register.css";
 
 type FormErrors = Partial<
   Record<"displayName" | "email" | "password" | "confirmPassword" | "general", string>
@@ -80,30 +81,30 @@ export function RegisterPage() {
   };
 
   return (
-    <div className="min-h-screen bg-[#0D1117] text-white flex items-center justify-center px-4 py-10">
-      <div className="w-full max-w-lg">
-        <div className="bg-slate-950/90 border border-white/10 shadow-[0_30px_80px_rgba(0,0,0,0.35)] rounded-[32px] p-10">
+    <div className="register-page">
+      <div className="register-container">
+        <div className="register-card">
           {/* Logo */}
-          <div className="flex justify-center mb-8">
-            <div className="flex items-center gap-3">
-              <Shield className="w-9 h-9 text-red-500" />
-              <span className="text-xl font-semibold tracking-wide">RedFlag AI</span>
+          <div className="register-logo">
+            <div className="register-logo-inner">
+              <Shield className="register-logo-icon" />
+              <span className="register-logo-text">RedFlag AI</span>
             </div>
           </div>
 
           {/* Heading */}
-          <h2 className="text-3xl font-semibold text-center mb-8">Create Your Account</h2>
+          <h2 className="register-heading">Create Your Account</h2>
 
           {/* Form */}
-          <form onSubmit={handleSubmit} className="space-y-6" noValidate>
+          <form onSubmit={handleSubmit} className="register-form" noValidate>
             {errors.general ? (
-              <div className="rounded-3xl border border-red-600/30 bg-red-600/10 p-4 text-sm text-red-100 shadow-sm">
+              <div className="register-error-banner">
                 {errors.general}
               </div>
             ) : null}
 
             <div>
-              <label htmlFor="displayName" className="block text-sm mb-2 text-slate-300">
+              <label htmlFor="displayName" className="register-label">
                 Display Name
               </label>
               <input
@@ -113,15 +114,15 @@ export function RegisterPage() {
                 onChange={(event) => setDisplayName(event.target.value)}
                 type="text"
                 placeholder="Juan Dela Cruz"
-                className="w-full rounded-2xl border border-white/10 bg-slate-900/80 px-5 py-4 text-white placeholder:text-slate-500 outline-none transition focus:border-red-500 focus:ring-4 focus:ring-red-500/20"
+                className="register-input"
               />
               {errors.displayName ? (
-                <p className="mt-2 text-sm text-red-300">{errors.displayName}</p>
+                <p className="register-field-error">{errors.displayName}</p>
               ) : null}
             </div>
 
             <div>
-              <label htmlFor="email" className="block text-sm mb-2 text-slate-300">
+              <label htmlFor="email" className="register-label">
                 Email
               </label>
               <input
@@ -131,13 +132,13 @@ export function RegisterPage() {
                 onChange={(event) => setEmail(event.target.value)}
                 type="email"
                 placeholder="your.email@example.com"
-                className="w-full rounded-2xl border border-white/10 bg-slate-900/80 px-5 py-4 text-white placeholder:text-slate-500 outline-none transition focus:border-red-500 focus:ring-4 focus:ring-red-500/20"
+                className="register-input"
               />
-              {errors.email ? <p className="mt-2 text-sm text-red-300">{errors.email}</p> : null}
+              {errors.email ? <p className="register-field-error">{errors.email}</p> : null}
             </div>
 
             <div>
-              <label htmlFor="password" className="block text-sm mb-2 text-slate-300">
+              <label htmlFor="password" className="register-label">
                 Password
               </label>
               <input
@@ -147,15 +148,15 @@ export function RegisterPage() {
                 onChange={(event) => setPassword(event.target.value)}
                 type="password"
                 placeholder="••••••••"
-                className="w-full rounded-2xl border border-white/10 bg-slate-900/80 px-5 py-4 text-white placeholder:text-slate-500 outline-none transition focus:border-red-500 focus:ring-4 focus:ring-red-500/20"
+                className="register-input"
               />
               {errors.password ? (
-                <p className="mt-2 text-sm text-red-300">{errors.password}</p>
+                <p className="register-field-error">{errors.password}</p>
               ) : null}
             </div>
 
             <div>
-              <label htmlFor="confirmPassword" className="block text-sm mb-2 text-slate-300">
+              <label htmlFor="confirmPassword" className="register-label">
                 Confirm Password
               </label>
               <input
@@ -165,27 +166,27 @@ export function RegisterPage() {
                 onChange={(event) => setConfirmPassword(event.target.value)}
                 type="password"
                 placeholder="••••••••"
-                className="w-full rounded-2xl border border-white/10 bg-slate-900/80 px-5 py-4 text-white placeholder:text-slate-500 outline-none transition focus:border-red-500 focus:ring-4 focus:ring-red-500/20"
+                className="register-input"
               />
               {errors.confirmPassword ? (
-                <p className="mt-2 text-sm text-red-300">{errors.confirmPassword}</p>
+                <p className="register-field-error">{errors.confirmPassword}</p>
               ) : null}
             </div>
 
             <button
               type="submit"
               disabled={isSubmitting}
-              className="w-full rounded-2xl bg-red-600 px-5 py-4 text-base font-semibold text-white transition hover:bg-red-700 disabled:cursor-not-allowed disabled:opacity-60"
+              className="register-submit-btn"
             >
               {isSubmitting ? "Creating account..." : "Sign Up"}
             </button>
           </form>
 
           {/* Links */}
-          <div className="mt-8 text-center space-y-3">
-            <div className="text-sm text-slate-400">
+          <div className="register-footer">
+            <div className="register-back-link">
               Already have an account?{" "}
-              <Link to="/login" className="text-red-500 hover:text-red-400 transition-colors">
+              <Link to="/login" className="register-login-link">
                 Log In
               </Link>
             </div>
@@ -193,8 +194,8 @@ export function RegisterPage() {
         </div>
 
         {/* Back to Home */}
-        <div className="mt-5 text-center">
-          <Link to="/" className="text-sm text-slate-400 hover:text-white transition-colors">
+        <div className="register-back">
+          <Link to="/" className="register-back-link">
             ← Back to Home
           </Link>
         </div>
