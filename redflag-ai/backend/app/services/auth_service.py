@@ -4,10 +4,14 @@ from app.schemas.auth import RegisterRequest, LoginRequest
 from app.core.security import hash_password, verify_password, create_access_token
 from fastapi import HTTPException
 
+
 def register_user(db: Session, data: RegisterRequest):
     existing = db.query(User).filter(User.email == data.email).first()
     if existing:
-        raise HTTPException(status_code=400, detail="This email is already registered. Please log in instead.")
+        raise HTTPException(
+            status_code=400,
+            detail="This email is already registered. Please log in instead."
+        )
     user = User(
         email=data.email,
         display_name=data.display_name,
@@ -17,6 +21,7 @@ def register_user(db: Session, data: RegisterRequest):
     db.commit()
     db.refresh(user)
     return {"message": "Account created successfully"}
+
 
 def login_user(db: Session, data: LoginRequest):
     user = db.query(User).filter(User.email == data.email).first()
@@ -32,5 +37,10 @@ def login_user(db: Session, data: LoginRequest):
 
     return {
         "access_token": token,
-        "token_type": "bearer"
+        "token_type": "bearer",
+        "user": {
+            "id": user.id,
+            "email": user.email,
+            "display_name": user.display_name
+        }
     }

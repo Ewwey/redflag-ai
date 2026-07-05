@@ -10,7 +10,7 @@ router = APIRouter()
 def register(data: RegisterRequest, db: Session = Depends(get_db)):
     return register_user(db, data)
 
-@router.post("/login", response_model=TokenResponse)
+@router.post("/login")
 def login(data: LoginRequest, db: Session = Depends(get_db)):
     return login_user(db, data)
 

@@ -10,7 +10,6 @@ export function AuthProvider({ children }) {
   const [token, setToken] = useState(null);
   const [loading, setLoading] = useState(true);
 
-  // Restore session + validate token on app startup
   useEffect(() => {
     const initializeAuth = async () => {
       try {
@@ -29,20 +28,25 @@ export function AuthProvider({ children }) {
           return;
         }
 
-        // Use stored user first if present (e.g. { email } from LoginPage)
-        if (data.user) {
-          setUser(data.user);
-        }
+        // Set token immediately so authenticated requests work
+        setToken(data.token);
 
-        // Verify token with backend + get real user data
+        // Always verify with backend to get fresh user data including display_name
         const response = await axios.get(`${API}/auth/me`, {
           headers: {
             Authorization: `Bearer ${data.token}`,
           },
         });
 
-        setUser(response.data);
-        setToken(data.token);
+        const freshUser = response.data;
+        setUser(freshUser);
+
+        // Update localStorage with fresh user data so next startup has display_name
+        localStorage.setItem("redflagUser", JSON.stringify({
+          ...data,
+          user: freshUser,
+        }));
+
       } catch {
         localStorage.removeItem("redflagUser");
         setUser(null);
@@ -55,8 +59,6 @@ export function AuthProvider({ children }) {
     initializeAuth();
   }, []);
 
-  // data comes from LoginPage:
-  // { token, tokenType, user: { email } }
   const login = (data) => {
     const payload = {
       token: data.token,
@@ -66,8 +68,9 @@ export function AuthProvider({ children }) {
 
     localStorage.setItem("redflagUser", JSON.stringify(payload));
 
-    setUser(payload.user);
-    setToken(payload.token);
+    // Set user immediately from login response (has display_name from backend)
+    setUser(data.user ?? null);
+    setToken(data.token);
   };
 
   const logout = () => {

@@ -141,13 +141,11 @@ export function DashboardPage() {
           setScans(response.data);
           setUsingMock(false);
         } else {
-          // No real scans yet — fall back to mock data so the UI isn't empty
           setScans(mockScans);
           setUsingMock(true);
         }
       } catch (err) {
         console.error("Failed to fetch scans:", err);
-        // API failed — fall back to mock data
         setScans(mockScans);
         setUsingMock(true);
         setFetchError("Could not connect to server. Showing sample data.");
@@ -161,7 +159,7 @@ export function DashboardPage() {
 
   const handleLogout = () => {
     logout();
-    navigate("/login");
+    navigate("/");
   };
 
   const getScanId = (scan: ScanEntry) => scan.scan_id ?? scan.id;
@@ -193,17 +191,55 @@ export function DashboardPage() {
     }
   };
 
-  const handleViewDetails = (scan: ScanEntry) => {
-    navigate("/result", {
-      state: {
-        scanData: {
-          scan_id: getScanId(scan),
-          scam_score: scan.scam_score,
-          risk_level: scan.risk_level,
-          red_flags: scan.red_flags ?? [],
+  const handleViewDetails = async (scan: ScanEntry) => {
+    // If using mock data, just use what we have locally
+    if (usingMock) {
+      navigate("/result", {
+        state: {
+          scanData: {
+            scan_id: getScanId(scan),
+            scam_score: scan.scam_score,
+            risk_level: scan.risk_level,
+            red_flags: scan.red_flags ?? [],
+          },
         },
-      },
-    });
+      });
+      return;
+    }
+
+    // Real data — fetch full detail from API to get red flags
+    try {
+      const baseURL = import.meta.env.VITE_API_BASE_URL || "http://localhost:8000";
+      const storedUser = localStorage.getItem("redflagUser");
+      const token = storedUser ? JSON.parse(storedUser).token : null;
+
+      const response = await axios.get(`${baseURL}/scans/${getScanId(scan)}`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+
+      navigate("/result", {
+        state: {
+          scanData: {
+            scan_id: response.data.scan_id ?? response.data.id,
+            scam_score: response.data.scam_score,
+            risk_level: response.data.risk_level,
+            red_flags: response.data.red_flags ?? [],
+          },
+        },
+      });
+    } catch (err) {
+      console.error("Failed to fetch scan detail:", err);
+      navigate("/result", {
+        state: {
+          scanData: {
+            scan_id: getScanId(scan),
+            scam_score: scan.scam_score,
+            risk_level: scan.risk_level,
+            red_flags: scan.red_flags ?? [],
+          },
+        },
+      });
+    }
   };
 
   const formatScanDate = (scan: ScanEntry) => {
@@ -229,7 +265,6 @@ export function DashboardPage() {
     return scan.time ?? "";
   };
 
-  // Client-side filter+sort for mock data (real data is filtered by backend)
   const displayedScans = usingMock
     ? scans
         .filter((s) => filterLevel === "All" || s.risk_level === filterLevel)
@@ -248,7 +283,7 @@ export function DashboardPage() {
 
   return (
     <div className="min-h-screen bg-[#0D1117] text-white">
-      <Navbar isLoggedIn userName={user?.name || user?.email || "User"} />
+      <Navbar />
 
       <div className="max-w-7xl mx-auto px-6 py-12">
         {/* Header */}

@@ -1,7 +1,13 @@
+import { useContext } from "react";
+import { Navigate } from "react-router-dom";
+import { AuthContext } from "../../context/AuthContext";
 import { Link } from "react-router-dom";
 import { Shield, Zap, Target, Mail, ArrowRight, ShieldAlert, CheckCircle2 } from "lucide-react";
 
 export function LandingPage() {
+  const auth = useContext(AuthContext) as any;
+  if (auth?.isAuthenticated) return <Navigate to="/dashboard" replace />;
+
   return (
     <div className="min-h-screen bg-[#0D1117] text-white font-sans selection:bg-red-500/30">
       {/* Navigation */}

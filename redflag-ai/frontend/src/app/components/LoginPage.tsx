@@ -54,11 +54,12 @@ export function LoginPage() {
       const response = await login({ email, password });
 
       const data = response.data;
+      console.log("LOGIN RESPONSE:", data);
 
       loginContext({
         token: data.access_token,
         tokenType: data.token_type || "bearer",
-        user: { email }
+        user: data.user ?? { email }
       });
       navigate("/dashboard");
     } catch (error: any) {
