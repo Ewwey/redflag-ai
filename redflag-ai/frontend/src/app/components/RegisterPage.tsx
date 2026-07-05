@@ -2,7 +2,7 @@ import { Link, useNavigate } from "react-router-dom";
 import { Shield } from "lucide-react";
 import { useState } from "react";
 import { register } from "../../services/authService";
-import "../../styles/register.css";
+import "../../styles/registerpage.css";
 
 type FormErrors = Partial<
   Record<"displayName" | "email" | "password" | "confirmPassword" | "general", string>

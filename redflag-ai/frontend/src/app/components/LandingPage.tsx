@@ -1,7 +1,7 @@
 import { useContext } from "react";
 import { Navigate } from "react-router-dom";
 import { AuthContext } from "../../context/AuthContext";
-import "../../styles/landing.css";
+import "../../styles/landingpage.css";
 import { Link } from "react-router-dom";
 import { Shield, Zap, Target, Mail, ArrowRight, ShieldAlert, CheckCircle2 } from "lucide-react";
 
